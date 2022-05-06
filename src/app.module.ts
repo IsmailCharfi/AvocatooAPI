@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { MessagingGateway } from './messaging.gateway';
 import * as dotenv from 'dotenv';
 dotenv.config();
 @Module({
@@ -22,6 +23,6 @@ dotenv.config();
     AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [MessagingGateway],
 })
 export class AppModule {}

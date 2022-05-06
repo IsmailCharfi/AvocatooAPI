@@ -11,10 +11,12 @@ export class AuthController {
 
   @Post('register')
   register(@Body() registerDto: RegisterDto): Promise<User> {
+    console.log("register")
     return this.authService.register(registerDto);
   }
   @Post('login')
   login(@Body() credentialsDto: CredenialsDto): Promise<LoginResponeDto> {
+    console.log("login")
     return this.authService.login(credentialsDto);
   }
 }
