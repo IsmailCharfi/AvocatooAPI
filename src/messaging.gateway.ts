@@ -7,7 +7,7 @@ import { Socket, Server } from 'socket.io';
    text: string
    date: string
  }
- 
+
  @WebSocketGateway({
    cors: {
      origin: '*',

@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponeDto } from "./dto/login-respone.dto";
+import { RolesEnum } from 'src/misc/enums/roles.enum';
+import { LoginAdminResponeDto } from './dto/admin-login-response.dto';
 @Injectable()
 export class AuthService {
 
@@ -27,7 +29,7 @@ export class AuthService {
     return user;
   }
 
-  async login(credentialsDto: CredenialsDto): Promise<LoginResponeDto> {
+  async login(credentialsDto: CredenialsDto, isAdmin: boolean): Promise<LoginResponeDto | LoginAdminResponeDto> {
 
     const { email, password } = credentialsDto;
     const user = await this.userService.getUserByEmail(email);
@@ -44,7 +46,22 @@ export class AuthService {
       roles: user.roles,
     };
     const jwt = this.jwtService.sign(payload);
-    return { jwt };
+    
+    if (isAdmin){
+      return { 
+        accessToken: jwt, 
+        userData: {
+          id: user.id,
+          ability:[{action:'',subject:''}], 
+          avatar:'', 
+          email: user.email  ,
+          fullName: "avocatoo admin",
+          username: "avocatoo",
+          roles: user.roles
+        }
+      };
+    }
+    return {jwt}
   }
 
 }

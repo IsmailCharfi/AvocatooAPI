@@ -1,9 +1,10 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Param, Post } from "@nestjs/common";
 import { AuthService } from './auth.service';
 import { User } from '../user/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { CredenialsDto } from "./dto/credenials.dto";
 import { LoginResponeDto } from "./dto/login-respone.dto";
+import { LoginAdminResponeDto } from "./dto/admin-login-response.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -14,9 +15,9 @@ export class AuthController {
     console.log("register")
     return this.authService.register(registerDto);
   }
-  @Post('login')
-  login(@Body() credentialsDto: CredenialsDto): Promise<LoginResponeDto> {
-    console.log("login")
-    return this.authService.login(credentialsDto);
+  @Post('login/:admin?')
+  login(@Body() credentialsDto: CredenialsDto, @Param("admin")admin: string): Promise<LoginResponeDto | LoginAdminResponeDto> {
+    console.log(admin)
+    return this.authService.login(credentialsDto, !!admin);
   }
 }
