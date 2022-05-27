@@ -37,6 +37,10 @@ export class UserService extends CrudService<User> {
     return await this.userRepository.findOne({where:{ resetPasswordHash: Like(hash) }});
   }
 
+  async getUserByActivationHash(hash: string): Promise<User> {
+    return await this.userRepository.findOne({where:{ activationHash: Like(hash) }});
+  }
+
   async createResetPasswordHash(user: User): Promise<User>{
     
     const dataToHash = user.id + new Date().toDateString()
@@ -56,12 +60,21 @@ export class UserService extends CrudService<User> {
     return this.userRepository.save(user);
   }
 
+  async createActivationHash(user: User): Promise<User>{
+    
+    const dataToHash = user.id + new Date().toDateString() + Math.random()
+    user.activationHash = await bcrypt.hash(dataToHash, user.salt);
+
+    return this.userRepository.save(user);
+  }
+
   async activate(id: string) : Promise<SuccessReturn>{
     const user = await this.userRepository.findOneBy({id});
     
     if (!user) throw new NotFoundException();
 
     user.isActivated = true;
+    user.activationHash = null;
     this.userRepository.save(user);
 
     return {}

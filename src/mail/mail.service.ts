@@ -27,4 +27,20 @@ export class MailService {
       context: { name: user.email, hash: encodeURIComponent(user.resetPasswordHash) },
     });
   }
+
+  async sendActivationLink(to: string) {
+
+    let user = await this.userService.getUserByEmail(to);
+    if(!user) return;
+
+    user = await this.userService.createResetPasswordHash(user)
+
+    return await this.mailerService.sendMail({
+      from: process.env.MAIL_USER,
+      to,
+      subject: 'Réinitialisation de mot de passe',
+      template: resolve('./templates/reset-password.hbs'),
+      context: { name: user.email, hash: encodeURIComponent(user.resetPasswordHash) },
+    });
+  }
 }

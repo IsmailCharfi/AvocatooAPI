@@ -32,7 +32,7 @@ export class AuthController {
   @Post('/reset-password/hash/valid')
   checkHashValidity(@Body() hashValidityInputDto: HashValidityInputDto): Promise<HashValidityDto> {
     const {hash} = hashValidityInputDto;
-    return this.authService.checkHashValidity(hash);
+    return this.authService.checkResetHashValidity(hash);
   }
 
   @Post('/reset-password')

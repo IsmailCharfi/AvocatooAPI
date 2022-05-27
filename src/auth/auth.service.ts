@@ -31,6 +31,7 @@ export class AuthService {
       throw new ConflictException('there is already a user with this email');
     }
     user = await this.userService.create(registerDto, role);
+    user = await this.userService.createActivationHash(user);
     delete user.password;
     delete user.salt;
     return user;
@@ -87,7 +88,7 @@ export class AuthService {
     return { jwt };
   }
 
-  async checkHashValidity(hash: string): Promise<HashValidityDto> {
+  async checkResetHashValidity(hash: string): Promise<HashValidityDto> {
     hash = decodeURIComponent(hash)
     const user = await this.userService.getUserByResetPasswordHash(hash);
     if (!user)
@@ -100,19 +101,26 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<User> {
-    const {id, password, hash} = resetPasswordDto;
-    let user = await this.userService.getUserById(id);
+    const {password, hash} = resetPasswordDto;
+    let user = await this.userService.getUserByResetPasswordHash(hash);
     if (!user)
       throw new ConflictException();
-    const isValid = hash === user.resetPasswordHash;
-
-    if(!isValid)
-      throw new UnauthorizedException();
-    
+          
     user = await this.userService.resetPassword(user, password);
     delete user.password;
     delete user.salt;
     return user;
+  }
+
+  async activateAccountViaHash(hash: string): Promise<SuccessReturn> {
+    hash = decodeURIComponent(hash)
+    const user = await this.userService.getUserByActivationHash(hash);
+    if (!user)
+      throw new NotFoundException();
+    
+    this.userService.activate(user.id)
+
+    return {}
   }
   
 }

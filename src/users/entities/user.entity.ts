@@ -55,7 +55,7 @@ export class User extends TimeStamp {
   @JoinColumn()
   lpData: LpData
 
-  @OneToMany(() => Question, (question: Question) => question.client)
+  @OneToMany(() => Question, (question: Question) => question.client, {nullable: true})
   questions: Question[];
 
 }
