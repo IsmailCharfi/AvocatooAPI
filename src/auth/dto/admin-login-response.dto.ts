@@ -1,6 +1,6 @@
 import { RolesEnum } from "src/misc/enums/roles.enum";
 
-export interface LoginAdminResponeDto {
+export interface AdminLoginResponeDto {
     accessToken: string;
     userData: {id: string
     fullName: string;

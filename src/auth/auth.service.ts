@@ -1,67 +1,92 @@
-import { Injectable,UnauthorizedException} from '@nestjs/common';
-import { User } from '../user/entities/user.entity';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
-import { UserService } from '../user/user.service';
+import { UserService } from '../users/user.service';
 import { CredenialsDto } from './dto/credenials.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
-import { LoginResponeDto } from "./dto/login-respone.dto";
+import { LoginResponeDto } from './dto/login-respone.dto';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
-import { LoginAdminResponeDto } from './dto/admin-login-response.dto';
+import { AdminLoginResponeDto } from './dto/admin-login-response.dto';
+import { HashValidityDto } from './dto/hash-validity.dto';
+import { MailService } from 'src/mail/mail.service';
 @Injectable()
 export class AuthService {
-
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<User> {
+  async register(registerDto: RegisterDto, role: RolesEnum): Promise<User> {
     const { email } = registerDto;
     let user = await this.userService.getUserByEmail(email);
     if (user) {
-      throw new UnauthorizedException('Le user existe déjà');
+      throw new ConflictException('there is already a user with this email');
     }
-    user = await this.userService.create(registerDto);
+    user = await this.userService.create(registerDto, role);
     delete user.password;
     delete user.salt;
     return user;
   }
 
-  async login(credentialsDto: CredenialsDto, isAdmin: boolean): Promise<LoginResponeDto | LoginAdminResponeDto> {
-
+  async login(
+    credentialsDto: CredenialsDto,
+    adminRoute: boolean,
+  ): Promise<LoginResponeDto | AdminLoginResponeDto> {
     const { email, password } = credentialsDto;
     const user = await this.userService.getUserByEmail(email);
+
     if (!user) {
-      throw new UnauthorizedException('Veuillez vérifier vos credentials');
+      throw new NotFoundException('There is no user with this email');
     }
 
-    const isLoggedIn = await bcrypt.compare(password, user.password);
-    if (!isLoggedIn) {
-      throw new UnauthorizedException('Veuillez vérifier vos credentials');
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
+      throw new ForbiddenException('Check your password');
     }
+
     const payload: JwtPayloadDto = {
       email: user.email,
       roles: user.roles,
     };
+
     const jwt = this.jwtService.sign(payload);
-    
-    if (isAdmin){
-      return { 
-        accessToken: jwt, 
-        userData: {
-          id: user.id,
-          ability:[{action:'',subject:''}], 
-          avatar:'', 
-          email: user.email  ,
-          fullName: "avocatoo admin",
-          username: "avocatoo",
-          roles: user.roles
-        }
-      };
+
+    if (adminRoute) {
+      if (user.roles.includes(RolesEnum.ROLE_ADMIN))
+        return {
+          accessToken: jwt,
+          userData: {
+            id: user.id,
+            ability: [{ action: '', subject: '' }],
+            avatar: '',
+            email: user.email,
+            fullName: 'avocatoo admin',
+            username: 'avocatoo',
+            roles: user.roles,
+          },
+        };
+      throw new UnauthorizedException('Check your credentials');
     }
-    return {jwt}
+
+    return { jwt };
   }
 
+  async checkHashValidity(hash: string): Promise<HashValidityDto> {
+    const user = await this.userService.getUserByResetPasswordHash(hash);
+    
+    if (!user)
+      return {isValid: false}
+
+    const timediff = (new Date().valueOf() - user.resetPasswordSentAt.valueOf()) / (3600 * 1000);
+    const isValid =  timediff < 1 && timediff > 0;
+    return {isValid}
+  }
 }

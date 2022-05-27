@@ -22,4 +22,19 @@ export class User extends TimeStamp {
   })
   roles: RolesEnum[];
 
+  @Column({nullable: true})
+  resetPasswordHash: string;
+
+  @Column({nullable: true})
+  resetPasswordSentAt: Date;
+
+  @Column({nullable: true})
+  accepted: boolean;
+  
+  @Column({nullable: true})
+  activated: boolean;
+
+  @Column({nullable: true})
+  activationHash: string;
+
 }

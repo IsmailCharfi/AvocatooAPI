@@ -4,8 +4,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 @Injectable()
 export class CrudService<T> {
   constructor(private readonly repositoy: Repository<T>) {}
-  create(entity): Promise<T> {
-    return this.repositoy.save(entity);
+  
+  create(...args: any[]): Promise<T> {
+    return this.repositoy.save(args[0]);
   }
 
   findAll(): Promise<T[]> {
@@ -17,13 +18,13 @@ export class CrudService<T> {
     return this.repositoy.findOne(id);
   }
 
-  async update(id: number, entity): Promise<(DeepPartial<T> & T)[]> {
-    const newEntity = await this.repositoy.preload({ id, ...entity });
+  async update(id: number, ...args: any[]): Promise<(DeepPartial<T> & T)[]> {
+    const newEntity = await this.repositoy.preload({ id, ...args[0] });
     if (newEntity) {
       // @ts-ignore
       return this.repositoy.save(newEntity);
     } else {
-      throw new NotFoundException(`id ${id} n'existe pas `);
+      throw new NotFoundException();
     }
   }
 
