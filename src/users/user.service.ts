@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CrudService } from "../misc/crud";
 import { User } from "./entities/user.entity";
 import { Like, Repository } from "typeorm";
@@ -55,4 +55,28 @@ export class UserService extends CrudService<User> {
 
     return this.userRepository.save(user);
   }
+
+  async activate(id: string) : Promise<SuccessReturn>{
+    const user = await this.userRepository.findOneBy({id});
+    
+    if (!user) throw new NotFoundException();
+
+    user.isActivated = true;
+    this.userRepository.save(user);
+
+    return {}
+  }
+
+  async deactivate(id: string) : Promise<SuccessReturn>{
+    const user = await this.userRepository.findOneBy({id});
+    
+    if (!user) throw new NotFoundException();
+
+    user.isActivated = false;
+    this.userRepository.save(user);
+
+    return {}
+  }
+
+
 }

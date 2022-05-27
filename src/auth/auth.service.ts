@@ -47,6 +47,10 @@ export class AuthService {
       throw new NotFoundException('There is no user with this email');
     }
 
+    if (!user.isActivated) {
+      throw new UnauthorizedException('Veuillez activer votre compte');
+    }
+
     const passwordMatches = await bcrypt.compare(password, user.password);
     if (!passwordMatches) {
       throw new ForbiddenException('Check your password');
@@ -60,17 +64,21 @@ export class AuthService {
     const jwt = this.jwtService.sign(payload);
 
     if (adminRoute) {
-      if (user.roles.includes(RolesEnum.ROLE_ADMIN))
+      if (user.roles.includes(RolesEnum.ROLE_ADMIN) || user.roles.includes(RolesEnum.ROLE_DEV))
         return {
           accessToken: jwt,
           userData: {
             id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            dateOfBirth: user.dateOfBirth,
+            isOnline: user.isOnline,
+            lpData: user.lpData,
+            roles: user.roles,
+            userName: user.userName,
             ability: [{ action: '', subject: '' }],
             avatar: '',
-            email: user.email,
-            fullName: 'avocatoo admin',
-            username: 'avocatoo',
-            roles: user.roles,
           },
         };
       throw new UnauthorizedException('Check your credentials');

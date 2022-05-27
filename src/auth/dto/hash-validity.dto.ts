@@ -1,4 +1,4 @@
-export interface HashValidityDto {
+export class HashValidityDto {
     isValid: boolean;
     id?: string
   }

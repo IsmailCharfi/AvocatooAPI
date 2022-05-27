@@ -13,10 +13,10 @@ export class Question extends TimeStamp {
   @Column()
   title: string;
 
-  @ManyToOne(() => User, (user: User) => user.questions)
+  @ManyToOne(() => User, (user: User) => user.questions, {eager: true})
   client: User;
 
-  @ManyToOne(() => Category, (category: Category) => category.questions)
+  @ManyToOne(() => Category, (category: Category) => category.questions, {eager: true})
   category: Category
   
   @OneToMany(() => Ticket, (ticket: Ticket) => ticket.question)

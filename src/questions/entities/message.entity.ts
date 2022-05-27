@@ -9,10 +9,10 @@ export class Message extends TimeStamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {eager: true})
   from : User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {eager: true})
   to : User;
 
   @Column()

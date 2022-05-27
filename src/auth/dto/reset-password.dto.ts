@@ -1,5 +1,5 @@
 
-export interface ResetPasswordDto {
+export class ResetPasswordDto {
     id: string
     hash: string
     password: string

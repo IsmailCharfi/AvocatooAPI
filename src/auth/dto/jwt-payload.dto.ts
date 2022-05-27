@@ -1,6 +1,6 @@
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 
-export interface JwtPayloadDto {
+export class JwtPayloadDto {
   roles: RolesEnum[];
   email: string;
 }

@@ -14,14 +14,11 @@ export class LpData extends TimeStamp {
   @Column()
   image: string;
 
-  @ManyToMany(() => Category, (category: Category) => category.experts)
+  @ManyToMany(() => Category, (category: Category) => category.experts, {eager: true})
   @JoinTable()
   expertise: Category[];
 
-  @OneToOne(
-      () => User,
-      (user: User) => user.lpData
-  )
+  @OneToOne(() => User, (user: User) => user.lpData)
   @JoinColumn()
   user: User;
 

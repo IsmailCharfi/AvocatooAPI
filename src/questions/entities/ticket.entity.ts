@@ -17,13 +17,13 @@ export class Ticket extends TimeStamp {
   @Column()
   isTyping: boolean;
 
-  @ManyToOne(() => Question, (question: Question) => question.tickets)
+  @ManyToOne(() => Question, (question: Question) => question.tickets, {eager: true})
   question: Question;
 
-  @ManyToOne(() => LpData, (lp: LpData) => lp.tickets)
+  @ManyToOne(() => LpData, (lp: LpData) => lp.tickets, {eager: true})
   lp : LpData;
 
-  @OneToMany(() => Message, (message: Message) => message.ticket)
+  @OneToMany(() => Message, (message: Message) => message.ticket, {eager: true})
   messages: Message[];
  
 

@@ -51,10 +51,7 @@ export class User extends TimeStamp {
   @Column()
   isOnline: boolean;
 
-  @OneToOne(
-    ()=> LpData,
-    {nullable: true}
-  )
+  @OneToOne(()=> LpData,{nullable: true, eager: true})
   @JoinColumn()
   lpData: LpData
 

@@ -17,6 +17,6 @@ export class Post extends TimeStamp {
   @Column()
   isAccepted: boolean;
 
-  @ManyToOne(() => LpData, (lp: LpData) => lp.posts)
+  @ManyToOne(() => LpData, (lp: LpData) => lp.posts, {eager: true})
   lp: LpData;
 }

@@ -1,13 +1,19 @@
 import { RolesEnum } from "src/misc/enums/roles.enum";
+import { LpData } from "src/users/entities/lp-data.entity";
 
-export interface AdminLoginResponeDto {
+export class AdminLoginResponeDto {
     accessToken: string;
-    userData: {id: string
-    fullName: string;
-    username: string;
-    avatar: string;
-    email: string;
-    ability: [{action: string, subject:string}]
-    roles: RolesEnum[]
+    userData: {
+        id: string;
+        email: string;
+        firstName: string; 
+        lastName: string;
+        userName: string;
+        dateOfBirth: Date;
+        roles: RolesEnum[];
+        isOnline: boolean;
+        lpData: LpData;
+        avatar: string;
+        ability: [{action: string, subject: string}];
     }
 }

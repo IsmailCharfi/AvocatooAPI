@@ -1,3 +1,3 @@
-export interface HashValidityInputDto {
+export class HashValidityInputDto {
     hash: string
   }
