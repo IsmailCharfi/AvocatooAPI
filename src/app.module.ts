@@ -5,7 +5,7 @@ import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MessagingGateway } from './messaging.gateway';
 import { MailModule } from './mail/mail.module';
-import { FeedsModule } from './feeds/feeds.module';
+import { FeedsModule } from './feed/feed.module';
 import { QuestionsModule } from './questions/questions.module';
 import * as dotenv from 'dotenv';
 dotenv.config();

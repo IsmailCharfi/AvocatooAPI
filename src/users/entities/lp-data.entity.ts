@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany
 import { Category } from 'src/questions/entities/category.entity';
 import { User } from './user.entity';
 import { Ticket } from 'src/questions/entities/ticket.entity';
-import { Post } from 'src/feeds/entities/post.entity';
+import { Post } from 'src/feed/entities/post.entity';
 
 @Entity()
 export class LpData extends TimeStamp {
