@@ -16,7 +16,7 @@ import { LoginResponeDto } from './dto/login-respone.dto';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { AdminLoginResponeDto } from './dto/admin-login-response.dto';
 import { HashValidityDto } from './dto/hash-validity.dto';
-import { MailService } from 'src/mail/mail.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -80,13 +80,31 @@ export class AuthService {
   }
 
   async checkHashValidity(hash: string): Promise<HashValidityDto> {
+    hash = decodeURIComponent(hash)
     const user = await this.userService.getUserByResetPasswordHash(hash);
-    
     if (!user)
       return {isValid: false}
 
     const timediff = (new Date().valueOf() - user.resetPasswordSentAt.valueOf()) / (3600 * 1000);
     const isValid =  timediff < 1 && timediff > 0;
-    return {isValid}
+    if(isValid) return {isValid, id: user.id}
+    return {isValid: false}
   }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<User> {
+    const {id, password, hash} = resetPasswordDto;
+    let user = await this.userService.getUserById(id);
+    if (!user)
+      throw new ConflictException();
+    const isValid = hash === user.resetPasswordHash;
+
+    if(!isValid)
+      throw new UnauthorizedException();
+    
+    user = await this.userService.resetPassword(user, password);
+    delete user.password;
+    delete user.salt;
+    return user;
+  }
+  
 }

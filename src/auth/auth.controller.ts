@@ -7,6 +7,8 @@ import { LoginResponeDto } from './dto/login-respone.dto';
 import { AdminLoginResponeDto } from './dto/admin-login-response.dto';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { HashValidityDto } from './dto/hash-validity.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { HashValidityInputDto } from './dto/hash-validity-input.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,9 +29,15 @@ export class AuthController {
     return this.authService.register(registerDto, RolesEnum.ROLE_ADMIN);
   }
 
-  @Get('/reset-password/hash/valid/:hash')
-  checkHashValidity(@Param('hash') hash: string): Promise<HashValidityDto> {
+  @Post('/reset-password/hash/valid')
+  checkHashValidity(@Body() hashValidityInputDto: HashValidityInputDto): Promise<HashValidityDto> {
+    const {hash} = hashValidityInputDto;
     return this.authService.checkHashValidity(hash);
+  }
+
+  @Post('/reset-password')
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<User> {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @Post('login/:admin?')

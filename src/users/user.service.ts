@@ -29,7 +29,30 @@ export class UserService extends CrudService<User> {
     return await this.userRepository.findOne({where:{ email }});
   }
 
+  async getUserById(id: string,): Promise<User> {
+    return await this.userRepository.findOne({where:{ id }});
+  }
+
   async getUserByResetPasswordHash(hash: string): Promise<User> {
     return await this.userRepository.findOne({where:{ resetPasswordHash: Like(hash) }});
+  }
+
+  async createResetPasswordHash(user: User): Promise<User>{
+    
+    const dataToHash = user.id + new Date().toDateString()
+    user.resetPasswordHash = await bcrypt.hash(dataToHash, user.salt);
+    user.resetPasswordSentAt = new Date()
+
+    this.userRepository.save(user)
+
+    return user;
+  }
+
+  async resetPassword(user: User, password:string): Promise<User>{  
+    user.password = await bcrypt.hash(password, user.salt);
+    user.resetPasswordHash = null;
+    user.resetPasswordSentAt = null;
+
+    return this.userRepository.save(user);
   }
 }
