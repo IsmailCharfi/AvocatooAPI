@@ -13,6 +13,9 @@ export class Question extends TimeStamp {
   @Column()
   title: string;
 
+  @Column()
+  closed: boolean;
+
   @ManyToOne(() => User, (user: User) => user.questions, {eager: true})
   client: User;
 

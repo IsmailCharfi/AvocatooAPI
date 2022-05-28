@@ -20,4 +20,9 @@ export class FeedController {
   registerClient(@Body() postDto: postDto): Promise<PostId.Post> {
     return this.feedService.addPost(postDto);
   }
+
+  @Get('/accept/:id')
+  acceptPost(@Param('id') id: string){
+    return this.feedService.acceptPost(id);
+  }
 }

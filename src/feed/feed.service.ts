@@ -39,5 +39,10 @@ export class FeedService extends CrudService<Post> {
         const category= await this.categoryRepository.findOne({where : {id : categoryId}})
         return this.postRepository.findBy(category);
 }
+    async acceptPost(categoryId : string):Promise<Post> {
+        const post = await this.postRepository.findOne({where : {id : categoryId}});
+        post.isAccepted=true;
+        return this.postRepository.save(post);
+}
   
 }
