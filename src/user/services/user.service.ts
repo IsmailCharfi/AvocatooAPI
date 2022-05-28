@@ -1,36 +1,70 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { CrudService } from "../misc/crud";
-import { User } from "./entities/user.entity";
-import { Like, Repository } from "typeorm";
+import { CrudService } from "src/misc/crud.service";
+import { User } from "../entities/user.entity";
+import { In, IsNull, Like, Not, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { RegisterDto } from "../auth/dto/register.dto";
+import { RegisterDto } from "../../auth/dto/register/register.dto";
 import * as bcrypt from "bcrypt";
 import { RolesEnum } from "src/misc/enums/roles.enum";
+import { LpDataService } from "./lpData.service";
 
 @Injectable()
-export class UserService extends CrudService<User> {
+export class UserService extends CrudService<User>{
 
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private lpDataService: LpDataService,
   ) {
-    super(userRepository);
+    super(userRepository)
   }
 
   async create(registerDto: RegisterDto, role: RolesEnum): Promise<User> {
-    const user = this.userRepository.create(registerDto);
+    const {lpData, ...userRegister} = registerDto;
+
+    const user = this.userRepository.create(userRegister);
+    user.lpData = await this.lpDataService.create(lpData);
     user.salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, user.salt);
-    user.roles = [RolesEnum.ROLE_USER, role]
+    user.role = role;
+
     return this.userRepository.save(user);
   }
 
-  async getUserByEmail(email: string,): Promise<User> {
-    return await this.userRepository.findOne({where:{ email }});
+  async getAll(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 
-  async getUserById(id: string,): Promise<User> {
-    return await this.userRepository.findOne({where:{ id }});
+  async getAllLps(): Promise<User[]> {
+    return await this.userRepository.find({where:{ role: RolesEnum.ROLE_LP }});
+  }
+
+  async getAllClients(): Promise<User[]> {
+    return await this.userRepository.find({where:{ role: RolesEnum.ROLE_CLIENT }});
+  }
+
+  async getAllAdmins(): Promise<User[]> {
+    return await this.userRepository.find({where:{ role: RolesEnum.ROLE_ADMIN}});
+  }
+
+  async getUserById(id: string): Promise<User> {
+    return await this.userRepository.findOneBy({id});
+  }
+
+  async getLpById(id: string): Promise<User> {
+    return await this.userRepository.findOneBy({ role: RolesEnum.ROLE_LP, id });
+  }
+
+  async getClientById(id :string): Promise<User> {
+    return await this.userRepository.findOneBy({ role: RolesEnum.ROLE_CLIENT, id });
+  }
+
+  async getAdminById(id: string): Promise<User> {
+    return await this.userRepository.findOneBy({ role: RolesEnum.ROLE_ADMIN, id});
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
+    return await this.userRepository.findOne({where:{ email }});
   }
 
   async getUserByResetPasswordHash(hash: string): Promise<User> {

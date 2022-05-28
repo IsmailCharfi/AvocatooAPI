@@ -1,7 +1,7 @@
 import { InjectRepository } from "@nestjs/typeorm";
-import { CrudService } from "src/misc/crud";
+import { CrudService } from "src/misc/crud.service";
 import { Repository } from "typeorm";
-import { Category } from "./entities/category.entity";
+import { Category } from "../entities/category.entity";
 
 export class categoryService extends CrudService<Category> {
 

@@ -1,6 +1,6 @@
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 
 export class JwtPayloadDto {
-  roles: RolesEnum[];
+  role: RolesEnum;
   email: string;
 }

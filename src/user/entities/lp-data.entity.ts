@@ -19,7 +19,6 @@ export class LpData extends TimeStamp {
   expertise: Category[];
 
   @OneToOne(() => User, (user: User) => user.lpData)
-  @JoinColumn()
   user: User;
 
   @OneToMany(() => Ticket, (ticket: Ticket) => ticket.lp)

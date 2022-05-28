@@ -1,27 +1,31 @@
 import {
   ConflictException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { UserService } from '../users/user.service';
-import { CredenialsDto } from './dto/credenials.dto';
+import { User } from '../../user/entities/user.entity';
+import { RegisterDto } from '../dto/register/register.dto';
+import { UserService } from '../../user/services/user.service';
+import { CredenialsDto } from '../dto/credenials.dto';
 import * as bcrypt from 'bcrypt';
-import { JwtPayloadDto } from './dto/jwt-payload.dto';
+import { JwtPayloadDto } from '../dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
-import { LoginResponeDto } from './dto/login-respone.dto';
+import { LoginResponeDto } from '../dto/login-respone.dto';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
-import { AdminLoginResponeDto } from './dto/admin-login-response.dto';
-import { HashValidityDto } from './dto/hash-validity.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AdminLoginResponeDto } from '../dto/admin-login-response.dto';
+import { HashValidityDto } from '../dto/hash-validity.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { MailService } from 'src/mail/services/mail.service';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto, role: RolesEnum): Promise<User> {
@@ -32,6 +36,7 @@ export class AuthService {
     }
     user = await this.userService.create(registerDto, role);
     user = await this.userService.createActivationHash(user);
+    await this.mailService.sendActivationMail(user.email);
     delete user.password;
     delete user.salt;
     return user;
@@ -45,27 +50,27 @@ export class AuthService {
     const user = await this.userService.getUserByEmail(email);
 
     if (!user) {
-      throw new NotFoundException('There is no user with this email');
+      throw new NotFoundException('Veuillez verifiez votre email');
     }
 
     if (!user.isActivated) {
-      throw new UnauthorizedException('Veuillez activer votre compte');
+      throw new ForbiddenException('Veuillez activer votre compte');
     }
 
     const passwordMatches = await bcrypt.compare(password, user.password);
     if (!passwordMatches) {
-      throw new ForbiddenException('Check your password');
+      throw new ForbiddenException('Veuillez verifiez votre email et mot de passe');
     }
 
     const payload: JwtPayloadDto = {
       email: user.email,
-      roles: user.roles,
+      role: user.role,
     };
 
     const jwt = this.jwtService.sign(payload);
 
     if (adminRoute) {
-      if (user.roles.includes(RolesEnum.ROLE_ADMIN) || user.roles.includes(RolesEnum.ROLE_DEV))
+      if (user.role === RolesEnum.ROLE_ADMIN || user.role === RolesEnum.ROLE_DEV)
         return {
           accessToken: jwt,
           userData: {
@@ -76,13 +81,12 @@ export class AuthService {
             dateOfBirth: user.dateOfBirth,
             isOnline: user.isOnline,
             lpData: user.lpData,
-            roles: user.roles,
-            userName: user.userName,
+            role: user.role,
             ability: [{ action: '', subject: '' }],
             avatar: '',
           },
         };
-      throw new UnauthorizedException('Check your credentials');
+      throw new ForbiddenException('Veuillez verifiez votre email et mot de passe');
     }
 
     return { jwt };

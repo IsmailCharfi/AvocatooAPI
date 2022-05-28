@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
-import { MailService } from "./mail.service";
+import { ActivationDto } from "../dto/activation.dto";
+import { ResetPasswordDto } from "../dto/reset-password.dto";
+import { MailService } from "../services/mail.service";
 @Controller('mail')
 export class MailController {
     constructor(private readonly mailService: MailService) {}
@@ -10,5 +11,12 @@ export class MailController {
     {
         const {email} = resetPasswordDto;
         return this.mailService.sendResetPasswordMail(email)
+    }
+
+    @Post("/send/activation")
+    ReSendActivationMail(@Body() activationDto: ActivationDto): any
+    {
+        const {email} = activationDto;
+        return this.mailService.sendActivationMail(email)
     }
 }

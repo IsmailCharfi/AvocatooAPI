@@ -1,6 +1,6 @@
 import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from 'src/users/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Ticket } from './ticket.entity';
 
 @Entity()

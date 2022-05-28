@@ -1,5 +1,5 @@
 import { RolesEnum } from "src/misc/enums/roles.enum";
-import { LpData } from "src/users/entities/lp-data.entity";
+import { LpData } from "src/user/entities/lp-data.entity";
 
 export class AdminLoginResponeDto {
     accessToken: string;
@@ -8,9 +8,8 @@ export class AdminLoginResponeDto {
         email: string;
         firstName: string; 
         lastName: string;
-        userName: string;
         dateOfBirth: Date;
-        roles: RolesEnum[];
+        role: RolesEnum;
         isOnline: boolean;
         lpData: LpData;
         avatar: string;

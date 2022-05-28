@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CrudService } from 'src/misc/crud';
-import { User } from 'src/users/entities/user.entity';
+import { CrudService } from 'src/misc/crud.service';
+import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { QuestionDto } from './dto/question.dto';
-import { Category } from './entities/category.entity';
-import { Question } from './entities/question.entity';
+import { QuestionDto } from '../dto/question.dto';
+import { Category } from '../entities/category.entity';
+import { Question } from '../entities/question.entity';
 
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { LpData } from 'src/users/entities/lp-data.entity';
+import { LpData } from 'src/user/entities/lp-data.entity';
 import { Question } from './question.entity';
 import { Post} from 'src/feed/entities/post.entity';
 

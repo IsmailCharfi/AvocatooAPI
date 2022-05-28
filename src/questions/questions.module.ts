@@ -1,17 +1,21 @@
-import { Module } from '@nestjs/common';
-import { QuestionsService } from './questions.service';
-import { QuestionsController } from './questions.controller';
-import { categoryService } from './category.service';
+import { forwardRef, Module } from '@nestjs/common';
+import { QuestionsService } from './services/questions.service';
+import { QuestionsController } from './controllers/questions.controller';
+import { categoryService } from './services/category.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
-import { UserModule } from 'src/users/user.module';
-import { Post } from 'src/feed/entities/post.entity';
-import { User } from 'src/users/entities/user.entity';
+import { UserModule } from 'src/user/user.module';
+import { User } from 'src/user/entities/user.entity';
 import { Question } from './entities/question.entity';
+import { Message } from './entities/message.entity';
+import { Ticket } from './entities/ticket.entity';
 
 @Module({
-  imports: [UserModule,TypeOrmModule.forFeature([Category,User,Question])],
-  controllers: [QuestionsController , ],
-  providers: [QuestionsService,categoryService,TypeOrmModule]
+  imports: [ 
+    forwardRef(() => UserModule),
+    TypeOrmModule.forFeature([Category, User, Question, Message, Ticket])
+  ],
+  controllers: [QuestionsController, ],
+  providers: [QuestionsService, categoryService]
 })
 export class QuestionsModule {}

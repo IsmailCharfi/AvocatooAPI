@@ -1,6 +1,6 @@
 import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { LpData } from 'src/users/entities/lp-data.entity';
+import { LpData } from 'src/user/entities/lp-data.entity';
 import { Category } from 'src/questions/entities/category.entity';
 
 @Entity()

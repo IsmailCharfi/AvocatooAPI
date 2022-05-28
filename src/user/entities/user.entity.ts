@@ -20,10 +20,10 @@ export class User extends TimeStamp {
   lastName: string;
 
   @Column()
-  userName: string;
+  dateOfBirth: Date;
 
   @Column()
-  dateOfBirth: Date;
+  phoneNumber: string;
 
   @Column()
   password: string;
@@ -31,10 +31,8 @@ export class User extends TimeStamp {
   @Column()
   salt: string;
 
-  @Column('set', {
-    enum: RolesEnum,
-  })
-  roles: RolesEnum[];
+  @Column( {type: 'enum', enum: RolesEnum})
+  role: RolesEnum;
 
   @Column({nullable: true})
   resetPasswordHash: string;

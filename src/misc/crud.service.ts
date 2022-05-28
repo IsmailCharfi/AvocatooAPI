@@ -13,12 +13,12 @@ export class CrudService<T> {
     return this.repositoy.find();
   }
 
-  findOne(id: number): Promise<T> {
+  findOne(id: string): Promise<T> {
     // @ts-ignore
     return this.repositoy.findOne(id);
   }
 
-  async update(id: number, ...args: any[]): Promise<(DeepPartial<T> & T)[]> {
+  async update(id: string, ...args: any[]): Promise<(DeepPartial<T> & T)[]> {
     const newEntity = await this.repositoy.preload({ id, ...args[0] });
     if (newEntity) {
       // @ts-ignore
@@ -28,14 +28,14 @@ export class CrudService<T> {
     }
   }
 
-  async remove(id: number): Promise<any> {
-    const deletedResponse = await await this.repositoy.softDelete(id);
+  async remove(id: string): Promise<any> {
+    const deletedResponse = await this.repositoy.softDelete(id);
     if (!deletedResponse?.affected) {
       throw new NotFoundException();
     }
     return deletedResponse;
   }
-  async restore(id: number): Promise<any> {
+  async restore(id: string): Promise<any> {
     const restoreResponse = await this.repositoy.restore(id);
     if (!restoreResponse?.affected) {
       throw new NotFoundException();

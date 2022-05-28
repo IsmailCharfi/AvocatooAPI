@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { User } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { CredenialsDto } from './dto/credenials.dto';
-import { LoginResponeDto } from './dto/login-respone.dto';
-import { AdminLoginResponeDto } from './dto/admin-login-response.dto';
+import { AuthService } from '../services/auth.service';
+import { User } from '../../user/entities/user.entity';
+import { RegisterDto } from '../dto/register/register.dto';
+import { CredenialsDto } from '../dto/credenials.dto';
+import { LoginResponeDto } from '../dto/login-respone.dto';
+import { AdminLoginResponeDto } from '../dto/admin-login-response.dto';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
-import { HashValidityDto } from './dto/hash-validity.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { HashValidityInputDto } from './dto/hash-validity-input.dto';
+import { HashValidityDto } from '../dto/hash-validity.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { HashValidityInputDto } from '../dto/hash-validity-input.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +38,11 @@ export class AuthController {
   @Post('/reset-password')
   resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<User> {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Get('activate/hash/:hash')
+  activateAccountViaHash(@Param('hash') hash: string) {
+    return this.authService.activateAccountViaHash(hash);
   }
 
   @Post('login/:admin?')

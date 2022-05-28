@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post} from '@nestjs/common';
-import { QuestionDto } from './dto/question.dto';
-import { Question } from './entities/question.entity';
-import { QuestionsService } from './questions.service';
+import { Controller, Get, Param, Post, UseGuards} from '@nestjs/common';
+import { JwtAuthGuard } from 'src/misc/guards/authentication.guard';
+import { QuestionsService } from '../services/questions.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('questions')
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}

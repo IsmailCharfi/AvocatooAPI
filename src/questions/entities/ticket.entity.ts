@@ -1,8 +1,8 @@
 import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from 'src/users/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Question } from './question.entity';
-import { LpData } from 'src/users/entities/lp-data.entity';
+import { LpData } from 'src/user/entities/lp-data.entity';
 import { Message } from './message.entity';
 
 @Entity()
