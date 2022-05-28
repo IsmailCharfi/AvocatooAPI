@@ -1,6 +1,7 @@
 import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { LpData } from 'src/users/entities/lp-data.entity';
+import { Category } from 'src/questions/entities/category.entity';
 
 @Entity()
 export class Post extends TimeStamp {
@@ -16,6 +17,9 @@ export class Post extends TimeStamp {
 
   @Column()
   isAccepted: boolean;
+
+  @ManyToOne(() => Category, (category : Category) => category.posts)
+  category: Category;
 
   @ManyToOne(() => LpData, (lp: LpData) => lp.posts)
   lp: LpData;

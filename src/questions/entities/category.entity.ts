@@ -2,6 +2,7 @@ import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { LpData } from 'src/users/entities/lp-data.entity';
 import { Question } from './question.entity';
+import { Post} from 'src/feed/entities/post.entity';
 
 @Entity()
 export class Category extends TimeStamp {
@@ -17,4 +18,7 @@ export class Category extends TimeStamp {
 
   @OneToMany(() => Question, (question: Question) => question.category)
   questions: Question[];
+
+  @OneToMany(() => Post, (post: Post) => post.category)
+  posts: Post[];
 }
