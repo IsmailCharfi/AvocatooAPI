@@ -22,7 +22,7 @@ export class PostController {S
 
   @Get(':id')
   getPostById(@Param('id') id: string) {
-    return this.postService.getPostById(id);
+    return this.postService.findOne(id);
   }
 
   @Post()

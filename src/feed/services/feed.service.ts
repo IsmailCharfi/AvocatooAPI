@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CrudService } from 'src/misc/crud.service';
 import { Category } from 'src/questions/entities/category.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -7,7 +8,7 @@ import { postDto } from '../dto/post.dto';
 import { Post } from '../entities/post.entity';
 
 @Injectable()
-export class PostService  {
+export class PostService extends CrudService<Post> {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
@@ -16,6 +17,7 @@ export class PostService  {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {
+    super(postRepository);
   }
 
   async addPost(postDto: postDto): Promise<Post> {
@@ -39,9 +41,6 @@ export class PostService  {
       where: { id: categoryId },
     });
     return this.postRepository.findBy(category);
-  }
-  async getPostById(id: string): Promise<Post[]> {
-    return this.postRepository.findBy({id});
   }
   async acceptPost(categoryId: string): Promise<Post> {
     const post = await this.postRepository.findOne({
