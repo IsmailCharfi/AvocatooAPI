@@ -24,6 +24,5 @@ export class LpData extends TimeStamp {
   @OneToMany(() => Ticket, (ticket: Ticket) => ticket.lp)
   tickets: Ticket[];
 
-  @OneToMany(() => Post, (post: Post) => post.lp)
-  posts: Post[];
+ 
 }

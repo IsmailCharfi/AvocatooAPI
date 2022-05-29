@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { LpData } from './lp-data.entity';
 import { Question } from 'src/questions/entities/question.entity';
+import { Post } from 'src/feed/entities/post.entity';
 
 @Entity()
 export class User extends TimeStamp {
@@ -56,4 +57,6 @@ export class User extends TimeStamp {
   @OneToMany(() => Question, (question: Question) => question.client, {nullable: true})
   questions: Question[];
 
+  @OneToMany(() => Post, (post: Post) => post.user)
+  posts: Post[];
 }
