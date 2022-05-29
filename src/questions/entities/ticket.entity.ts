@@ -17,6 +17,9 @@ export class Ticket extends TimeStamp {
   @Column()
   isTyping: boolean;
 
+  @Column()
+  closed: boolean;
+
   @ManyToOne(() => Question, (question: Question) => question.tickets, {eager: true})
   question: Question;
 

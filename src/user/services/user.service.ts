@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../entities/user.entity';
-import { Like, Repository, SelectQueryBuilder } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRegisterDto } from '../../auth/dto/register/register-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -17,15 +17,12 @@ import { UpdateUserDto } from '../dto/update/update-user.dto';
 @Injectable()
 export class UserService {
   readonly ORDER_BY = 'firstName';
-  readonly queryBuilder: SelectQueryBuilder<User>;
 
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private lpDataService: LpDataService,
-  ) {
-    this.queryBuilder = userRepository.createQueryBuilder();
-  }
+  ) {}
 
   async create(userRegisterDto: UserRegisterDto, role: RolesEnum): Promise<User> {
     const { lpData, ...userRegister } = userRegisterDto;
@@ -40,36 +37,37 @@ export class UserService {
   }
 
   async getAll(getAllUsersDto: GetAllUsersDto): Promise<PageDto<User>> {
-    return Paginator.paginateAndCreatePage(this.queryBuilder, getAllUsersDto, {field: this.ORDER_BY});
+    const queryBuilder = this.userRepository.createQueryBuilder();
+
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllUsersDto, {field: this.ORDER_BY});
   }
 
   async getAllLps(getAllLpsDto: GetAllLpsDto): Promise<PageDto<User>> {
-    this.queryBuilder
+    const queryBuilder = this.userRepository.createQueryBuilder();
+
+    queryBuilder
       .where('role like :role', { role: RolesEnum.ROLE_LP })
       .andWhere('lpData is not null');
 
-    Paginator.paginate(this.queryBuilder, getAllLpsDto, {
-      field: this.ORDER_BY,
-    });
-    return Paginator.createPage(this.queryBuilder, getAllLpsDto);
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllLpsDto, {field: this.ORDER_BY,});
   }
 
   async getAllClients(getAllClientsDto: GetAllClientsDto): Promise<PageDto<User>> {
-    this.queryBuilder.where('role like :role', { role: RolesEnum.ROLE_CLIENT });
 
-    Paginator.paginate(this.queryBuilder, getAllClientsDto, {
-      field: this.ORDER_BY,
-    });
-    return Paginator.createPage(this.queryBuilder, getAllClientsDto);
+    const queryBuilder = this.userRepository.createQueryBuilder();
+
+    queryBuilder.where('role like :role', { role: RolesEnum.ROLE_CLIENT });
+
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllClientsDto, {field: this.ORDER_BY,});
   }
 
   async getAllAdmins(getAllAdminsDto: GetAllAdminsDto): Promise<PageDto<User>> {
-    this.queryBuilder.where('role like :role', { role: RolesEnum.ROLE_ADMIN });
 
-    Paginator.paginate(this.queryBuilder, getAllAdminsDto, {
-      field: this.ORDER_BY,
-    });
-    return Paginator.createPage(this.queryBuilder, getAllAdminsDto);
+    const queryBuilder = this.userRepository.createQueryBuilder();
+
+    queryBuilder.where('role like :role', { role: RolesEnum.ROLE_ADMIN });
+
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllAdminsDto, {field: this.ORDER_BY,});
   }
 
   async getUserById(id: string): Promise<User> {
