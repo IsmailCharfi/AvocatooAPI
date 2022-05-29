@@ -8,7 +8,7 @@ import { postDto } from '../dto/post.dto';
 import { Post } from '../entities/post.entity';
 
 @Injectable()
-export class FeedService extends CrudService<Post> {
+export class PostService extends CrudService<Post> {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
@@ -21,15 +21,16 @@ export class FeedService extends CrudService<Post> {
   }
 
   async addPost(postDto: postDto): Promise<Post> {
-    const { id, title, content, isAccepted } = postDto;
-    const post = this.postRepository.create({ id, title, content, isAccepted });
-    post.lp = await (await this.userRepository.findOneBy({ id })).lpData;
+    const { user, title, content } = postDto;
+    const post = this.postRepository.create({ title, content });
+    post.isAccepted=false;
+    post.user = await this.userRepository.findOneBy({ id: user });
     return this.postRepository.save(post);
   }
 
-  async modifyPost(postDto: postDto): Promise<Post> {
-    const { lp, isAccepted, ...data } = postDto;
-    return this.postRepository.save(data);
+  async updatePost(id : string,postDto: postDto ): Promise<Post> {
+    const { user, ...data } = postDto;
+    return this.postRepository.save({id , ...data});
   }
 
   async getAllPosts(): Promise<Post[]> {
