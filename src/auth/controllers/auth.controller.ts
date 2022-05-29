@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { User } from '../../user/entities/user.entity';
-import { RegisterDto } from '../dto/register/register.dto';
+import { UserRegisterDto } from '../dto/register/register-user.dto';
 import { CredenialsDto } from '../dto/credenials.dto';
 import { LoginResponeDto } from '../dto/login-respone.dto';
 import { AdminLoginResponeDto } from '../dto/admin-login-response.dto';
@@ -15,17 +15,17 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register/client')
-  registerClient(@Body() registerDto: RegisterDto): Promise<User> {
+  registerClient(@Body() registerDto: UserRegisterDto): Promise<User> {
     return this.authService.register(registerDto, RolesEnum.ROLE_CLIENT);
   }
 
   @Post('register/lp')
-  registerLp(@Body() registerDto: RegisterDto): Promise<User> {
+  registerLp(@Body() registerDto: UserRegisterDto): Promise<User> {
     return this.authService.register(registerDto, RolesEnum.ROLE_LP);
   }
 
   @Post('register/admin')
-  registerAdmin(@Body() registerDto: RegisterDto): Promise<User> {
+  registerAdmin(@Body() registerDto: UserRegisterDto): Promise<User> {
     return this.authService.register(registerDto, RolesEnum.ROLE_ADMIN);
   }
 

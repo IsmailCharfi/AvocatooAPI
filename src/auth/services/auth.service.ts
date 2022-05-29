@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
-import { RegisterDto } from '../dto/register/register.dto';
+import { UserRegisterDto } from '../dto/register/register-user.dto';
 import { UserService } from '../../user/services/user.service';
 import { CredenialsDto } from '../dto/credenials.dto';
 import * as bcrypt from 'bcrypt';
@@ -28,17 +28,20 @@ export class AuthService {
     private mailService: MailService,
   ) {}
 
-  async register(registerDto: RegisterDto, role: RolesEnum): Promise<User> {
-    const { email } = registerDto;
+  async register(userRegisterDto: UserRegisterDto, role: RolesEnum): Promise<User> {
+    const { email } = userRegisterDto;
     let user = await this.userService.getUserByEmail(email);
     if (user) {
       throw new ConflictException('there is already a user with this email');
     }
-    user = await this.userService.create(registerDto, role);
+    user = await this.userService.create(userRegisterDto, role);
     user = await this.userService.createActivationHash(user);
     await this.mailService.sendActivationMail(user.email);
     delete user.password;
     delete user.salt;
+    delete user.activationHash;
+    delete user.resetPasswordHash;
+    delete user.resetPasswordSentAt;
     return user;
   }
 

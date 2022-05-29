@@ -1,8 +1,8 @@
 import { Type } from "class-transformer";
-import { IsAlphanumeric, IsDate, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsNumberString, IsPhoneNumber, IsString } from "class-validator";
-import { LpDataRegisterDto } from "./lp-data-register.dto";
+import { IsDate, IsEmail, IsNotEmpty, IsNumberString, IsString } from "class-validator";
+import { LpDataRegisterDto } from "./register-lpData.dto";
 
-export class RegisterDto {
+export class UserRegisterDto {
 
   @IsNotEmpty()
   @IsEmail()

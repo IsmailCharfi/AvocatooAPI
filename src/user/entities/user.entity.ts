@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { LpData } from './lp-data.entity';
 import { Question } from 'src/questions/entities/question.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User extends TimeStamp {
@@ -26,24 +27,29 @@ export class User extends TimeStamp {
   phoneNumber: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @Column()
+  @Exclude()
   salt: string;
 
   @Column( {type: 'enum', enum: RolesEnum})
   role: RolesEnum;
 
   @Column({nullable: true})
+  @Exclude()
   resetPasswordHash: string;
 
   @Column({nullable: true})
+  @Exclude()
   resetPasswordSentAt: Date;
   
   @Column({nullable: true})
   isActivated: boolean;
 
   @Column({nullable: true})
+  @Exclude()
   activationHash: string;
 
   @Column()

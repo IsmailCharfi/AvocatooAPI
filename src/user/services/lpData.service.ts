@@ -1,38 +1,66 @@
-import { Injectable } from "@nestjs/common";
-import { CrudService } from "../../misc/crud.service";
-import { InjectRepository } from "@nestjs/typeorm";
-import { LpData } from "../entities/lp-data.entity";
-import { Repository } from "typeorm";
-import { LpDataRegisterDto } from "src/auth/dto/register/lp-data-register.dto";
-import { Category } from "src/questions/entities/category.entity";
-import { User } from "../entities/user.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { LpData } from '../entities/lp-data.entity';
+import { Repository } from 'typeorm';
+import { LpDataRegisterDto } from 'src/auth/dto/register/register-lpData.dto';
+import { Category } from 'src/questions/entities/category.entity';
+import { UpdateLpDataDto } from '../dto/update/update-lpData.dto';
 
 @Injectable()
-export class LpDataService extends CrudService<LpData>{
-
+export class LpDataService {
   constructor(
     @InjectRepository(LpData)
     private lpDataRepository: Repository<LpData>,
     @InjectRepository(Category)
-    private categoryRepository: Repository<Category>
-  ) {
-    super(lpDataRepository)
-  }
+    private categoryRepository: Repository<Category>,
+  ) {}
 
   async create(lpDataRegisterDto: LpDataRegisterDto): Promise<LpData> {
+    if (!lpDataRegisterDto) return null;
 
-    if(!lpDataRegisterDto) return null;
+    const { expertise, image } = lpDataRegisterDto;
 
-    const {expertise, image} = lpDataRegisterDto;
- 
-    const expertiseObjects = await Promise.all( expertise.map( async (expertise: string) => {
-        return await this.categoryRepository.findOneBy({id: expertise});
-    }))
+    const expertiseObjects = await Promise.all(
+      expertise.map(async (expertise: string) => {
+        return await this.categoryRepository.findOneBy({ id: expertise });
+      }),
+    );
 
-    const lpData = this.lpDataRepository.create({image, expertise: expertiseObjects});
+    const lpData = this.lpDataRepository.create({
+      image,
+      expertise: expertiseObjects,
+    });
 
     return this.lpDataRepository.save(lpData);
-   
   }
 
+  async update(id: string, lpDataUpdateDto: UpdateLpDataDto): Promise<LpData> {
+    if (!lpDataUpdateDto) return null;
+
+    const { expertise, image } = lpDataUpdateDto;
+
+    const newExpertiseObjects = await Promise.all(
+      expertise.map(async (expertise: string) => {
+        return await this.categoryRepository.findOneBy({ id: expertise });
+      }),
+    );
+
+    return this.lpDataRepository.save({
+      id,
+      image,
+      expertise: newExpertiseObjects,
+    });
+  }
+
+  async softDelete(id: string): Promise<SuccessReturn> {
+    await this.lpDataRepository.softDelete(id);
+
+    return {};
+  }
+
+  async restore(id: string): Promise<SuccessReturn> {
+    await this.lpDataRepository.restore(id);
+
+    return {};
+  }
 }

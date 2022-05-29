@@ -4,6 +4,7 @@ import { Order } from "src/misc/enums/order.enum";
 
 
 export class PageOptionsDto {
+  
   @IsEnum(Order)
   @IsOptional()
   readonly order?: Order = Order.ASC;
