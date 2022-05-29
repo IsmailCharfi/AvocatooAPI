@@ -1,55 +1,55 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { User } from '../../user/entities/user.entity';
 import { UserRegisterDto } from '../dto/register/register-user.dto';
 import { CredenialsDto } from '../dto/credenials.dto';
-import { LoginResponeDto } from '../dto/login-respone.dto';
-import { AdminLoginResponeDto } from '../dto/admin-login-response.dto';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
-import { HashValidityDto } from '../dto/hash-validity.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { HashValidityInputDto } from '../dto/hash-validity-input.dto';
+import { AbstractController, CreatedResponse, SuccessResponse } from 'src/misc/abstracts/abstract.controller';
+import { Roles } from 'src/misc/decorators/role.decorator';
+import { RoleGuard } from 'src/misc/guards/role.guard';
 
 @Controller('auth')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+export class AuthController extends AbstractController{
+  constructor(private readonly authService: AuthService) {super()}
 
   @Post('register/client')
-  registerClient(@Body() registerDto: UserRegisterDto): Promise<User> {
-    return this.authService.register(registerDto, RolesEnum.ROLE_CLIENT);
+  registerClient(@Body() registerDto: UserRegisterDto): Promise<CreatedResponse> {
+    return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_CLIENT));
   }
 
   @Post('register/lp')
-  registerLp(@Body() registerDto: UserRegisterDto): Promise<User> {
-    return this.authService.register(registerDto, RolesEnum.ROLE_LP);
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  registerLp(@Body() registerDto: UserRegisterDto): Promise<CreatedResponse> {
+    return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_LP));
   }
 
   @Post('register/admin')
-  registerAdmin(@Body() registerDto: UserRegisterDto): Promise<User> {
-    return this.authService.register(registerDto, RolesEnum.ROLE_ADMIN);
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  registerAdmin(@Body() registerDto: UserRegisterDto): Promise<CreatedResponse> {
+    return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_ADMIN));
   }
 
-  @Post('/reset-password/hash/valid')
-  checkHashValidity(@Body() hashValidityInputDto: HashValidityInputDto): Promise<HashValidityDto> {
-    const {hash} = hashValidityInputDto;
-    return this.authService.checkResetHashValidity(hash);
+  @Get('/reset-password/hash/valid/:hash')
+  checkHashValidity(@Param('hash') hash: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.authService.checkResetHashValidity(hash));
   }
 
   @Post('/reset-password')
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<User> {
-    return this.authService.resetPassword(resetPasswordDto);
+  @HttpCode(HttpStatus.OK)
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.authService.resetPassword(resetPasswordDto));
   }
 
   @Get('activate/hash/:hash')
-  activateAccountViaHash(@Param('hash') hash: string) {
-    return this.authService.activateAccountViaHash(hash);
+  activateAccountViaHash(@Param('hash') hash: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.authService.activateAccountViaHash(hash));
   }
 
   @Post('login/:admin?')
-  login(
-    @Body() credentialsDto: CredenialsDto,
-    @Param('admin') admin: string,
-  ): Promise<LoginResponeDto | AdminLoginResponeDto> {
-    return this.authService.login(credentialsDto, !!admin);
+  @HttpCode(HttpStatus.OK)
+  login(@Body() credentialsDto: CredenialsDto, @Param('admin') admin: string,): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.authService.login(credentialsDto, !!admin));
   }
 }

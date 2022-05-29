@@ -1,15 +1,12 @@
-import { TimeStamp } from '../../misc/TimeStamp'
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Category } from 'src/questions/entities/category.entity';
 import { User } from './user.entity';
 import { Ticket } from 'src/questions/entities/ticket.entity';
-import { Post } from 'src/feed/entities/post.entity';
+import { AbstractEntity } from 'src/misc/abstracts/abstract.entity';
+import { ExportLpDataSimpleDto } from "../dto/export/export-lpData-simple.dto";
 
 @Entity()
-export class LpData extends TimeStamp {
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class LpData extends AbstractEntity {
 
   @Column()
   image: string;
@@ -23,6 +20,17 @@ export class LpData extends TimeStamp {
 
   @OneToMany(() => Ticket, (ticket: Ticket) => ticket.lp)
   tickets: Ticket[];
+
+  exportLpDataSimple(): ExportLpDataSimpleDto {
+
+    const expertise = this.expertise.map(expertise => expertise.exportCategorySimple())
+
+    return {
+      id: this.id,
+      image: this.image,
+      expertise, 
+    }
+  }
 
  
 }

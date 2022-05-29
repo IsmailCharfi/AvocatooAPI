@@ -1,15 +1,13 @@
-import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { LpData } from './lp-data.entity';
 import { Question } from 'src/questions/entities/question.entity';
 import { Exclude } from 'class-transformer';
 import { Post } from 'src/feed/entities/post.entity';
+import { AbstractEntity } from 'src/misc/abstracts/abstract.entity';
+import { ExportUserSimpleDto } from "../dto/export/export-user-simple.dto";
 @Entity()
-export class User extends TimeStamp {
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class User extends AbstractEntity  {
 
   @Column({ length: 100, unique: true })
   email: string;
@@ -62,6 +60,21 @@ export class User extends TimeStamp {
   @OneToMany(() => Question, (question: Question) => question.client, {nullable: true})
   questions: Question[];
 
-  @OneToMany(() => Post, (post: Post) => post.user)
+  @OneToMany(() => Post, (post: Post) => post.creator)
   posts: Post[];
+
+  exportUserSimple(): ExportUserSimpleDto {
+    return {
+      id: this.id,
+      email: this.email,
+      firstName: this.email,
+      lastName: this.lastName,
+      dateOfBirth: this.dateOfBirth,
+      phoneNumber: this.phoneNumber,
+      role: this.role,
+      isActivated: this.isActivated,
+      isOnline: this.isOnline,
+      lpData: this.lpData? this.lpData.exportLpDataSimple() : null,   
+    }
+  }
 }

@@ -3,12 +3,12 @@ import { PageMetaDto } from "./page-meta.dto";
 
 export class PageDto<T> {
   @IsArray()
-  readonly data: T[];
+  readonly pageData: T[];
 
   readonly meta: PageMetaDto;
 
-  constructor(data: T[], meta: PageMetaDto) {
-    this.data = data;
+  constructor(pageData: T[], meta: PageMetaDto) {
+    this.pageData = pageData;
     this.meta = meta;
   }
 }

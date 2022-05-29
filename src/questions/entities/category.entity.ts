@@ -1,14 +1,12 @@
-import { TimeStamp } from '../../misc/TimeStamp'
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { LpData } from 'src/user/entities/lp-data.entity';
 import { Question } from './question.entity';
 import { Post} from 'src/feed/entities/post.entity';
+import { AbstractEntity } from 'src/misc/abstracts/abstract.entity';
+import { ExportCategorySimpleDto } from "../dto/export/export-category-simple.dto";
 
 @Entity()
-export class Category extends TimeStamp {
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class Category extends AbstractEntity {
 
   @Column()
   name: string;
@@ -21,4 +19,11 @@ export class Category extends TimeStamp {
 
   @OneToMany(() => Post, (post: Post) => post.category)
   posts: Post[];
+
+  exportCategorySimple(): ExportCategorySimpleDto {
+    return {
+      id: this.id,
+      name: this.name,
+    }
+  }
 }

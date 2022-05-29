@@ -1,12 +1,4 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException,} from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UserRegisterDto } from '../dto/register/register-user.dto';
 import { UserService } from '../../user/services/user.service';
@@ -20,6 +12,7 @@ import { AdminLoginResponeDto } from '../dto/admin-login-response.dto';
 import { HashValidityDto } from '../dto/hash-validity.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { MailService } from 'src/mail/services/mail.service';
+import { UpdateResult } from 'typeorm';
 @Injectable()
 export class AuthService {
   constructor(
@@ -119,15 +112,13 @@ export class AuthService {
     return user;
   }
 
-  async activateAccountViaHash(hash: string): Promise<SuccessReturn> {
+  async activateAccountViaHash(hash: string): Promise<UpdateResult> {
     hash = decodeURIComponent(hash)
     const user = await this.userService.getUserByActivationHash(hash);
     if (!user)
       throw new NotFoundException();
     
-    this.userService.activate(user.id)
-
-    return {}
+    return this.userService.activate(user.id)
   }
   
 }

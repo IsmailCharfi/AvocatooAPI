@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../entities/user.entity';
-import { Like, Repository } from 'typeorm';
+import { Like, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRegisterDto } from '../../auth/dto/register/register-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -13,6 +13,7 @@ import { GetAllClientsDto } from '../dto/get/get-all-clients.dto';
 import { GetAllAdminsDto } from '../dto/get/get-all-admins.dto';
 import { GetAllLpsDto } from '../dto/get/get-all-lps.dto';
 import { UpdateUserDto } from '../dto/update/update-user.dto';
+import { ExportUserSimpleDto } from '../dto/export/export-user-simple.dto';
 
 @Injectable()
 export class UserService {
@@ -36,10 +37,10 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async getAll(getAllUsersDto: GetAllUsersDto): Promise<PageDto<User>> {
+  async getAll(getAllUsersDto: GetAllUsersDto): Promise<PageDto<ExportUserSimpleDto>> {
     const queryBuilder = this.userRepository.createQueryBuilder();
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllUsersDto, {field: this.ORDER_BY});
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllUsersDto, {field: this.ORDER_BY}, (item: User) => item.exportUserSimple());
   }
 
   async getAllLps(getAllLpsDto: GetAllLpsDto): Promise<PageDto<User>> {
@@ -133,27 +134,25 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async activate(id: string): Promise<SuccessReturn> {
+  async activate(id: string): Promise<UpdateResult> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) throw new NotFoundException();
 
     user.isActivated = true;
     user.activationHash = null;
-    this.userRepository.save(user);
+    ;
 
-    return {};
+    return this.userRepository.update(user.id, user);
   }
 
-  async deactivate(id: string): Promise<SuccessReturn> {
+  async deactivate(id: string): Promise<UpdateResult> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) throw new NotFoundException();
 
     user.isActivated = false;
-    this.userRepository.save(user);
-
-    return {};
+    return this.userRepository.update(user.id, user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User>{
@@ -173,27 +172,24 @@ export class UserService {
     return newUser;
   }
 
-  async softDelete(id: string): Promise<SuccessReturn>{
+  async softDelete(id: string): Promise<UpdateResult>{
     const user = await this.userRepository.findOneBy({id});
     
     if(!user) 
     throw new NotFoundException()
     
     await this.lpDataService.softDelete(user.lpData.id);
-    await this.userRepository.softDelete(id);
+    return await this.userRepository.softDelete(id);
 
-    return {};
   }
 
-  async restore(id: string): Promise<SuccessReturn>{
+  async restore(id: string): Promise<UpdateResult>{
     const user = await this.userRepository.findOne({where: {id}, withDeleted: true});  
     
     if(!user) 
       throw new NotFoundException()
 
     await this.lpDataService.restore(user.lpData.id);
-    await this.userRepository.restore(id);
-
-    return {};
+    return await this.userRepository.restore(id);
   }
 }

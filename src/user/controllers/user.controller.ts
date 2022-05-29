@@ -5,77 +5,92 @@ import { GetAllAdminsDto } from '../dto/get/get-all-admins.dto';
 import { GetAllClientsDto } from '../dto/get/get-all-clients.dto';
 import { GetAllLpsDto } from '../dto/get/get-all-lps.dto';
 import { GetAllUsersDto } from '../dto/get/get-all-users.dto';
-import { User } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
 import { UpdateUserDto } from '../dto/update/update-user.dto';
+import { AbstractController, SuccessResponse } from 'src/misc/abstracts/abstract.controller';
+import { Roles } from 'src/misc/decorators/role.decorator';
+import { RolesEnum } from 'src/misc/enums/roles.enum';
+import { RoleGuard } from 'src/misc/guards/role.guard';
 
 @UseGuards(JwtAuthGuard)
-@Controller('user')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+@Controller('users')
+export class UserController extends AbstractController{
+  constructor(private readonly userService: UserService) {super()}
 
   @Get()
-  getAll(@Query() getAllUsersDto: GetAllUsersDto): Promise<PageDto<User>> {
-    return this.userService.getAll(getAllUsersDto);
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  getAll(@Query() getAllUsersDto: GetAllUsersDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getAll(getAllUsersDto));
   }
 
   @Get("/lp")
-  getAllLps(@Query() getAllLpsDto: GetAllLpsDto): Promise<PageDto<User>> {
-    return this.userService.getAllLps(getAllLpsDto);
+  getAllLps(@Query() getAllLpsDto: GetAllLpsDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getAllLps(getAllLpsDto));
   }
 
   @Get("/client")
-  getAllClients(@Query() getAllClientsDto: GetAllClientsDto): Promise<PageDto<User>> {
-    return this.userService.getAllClients(getAllClientsDto);
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  getAllClients(@Query() getAllClientsDto: GetAllClientsDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getAllClients(getAllClientsDto));
   }
 
   @Get("/admin")
-  getAllAdmins(@Query() getAllAdminsDto: GetAllAdminsDto): Promise<PageDto<User>> {
-    return this.userService.getAllAdmins(getAllAdminsDto);
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  getAllAdmins(@Query() getAllAdminsDto: GetAllAdminsDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getAllAdmins(getAllAdminsDto));
   }
 
   @Get("/:id")
-  getUseryId(@Param('id') id: string): Promise<User> {
-    return this.userService.getUserById(id);
+  getUseryId(@Param('id') id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getUserById(id));
   }
 
   @Get("/lp/:id")
-  getLpById(@Param('id') id: string): Promise<User> {
-    return this.userService.getLpById(id);
+  getLpById(@Param('id') id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getLpById(id));
   }
 
   @Get("/client/:id")
-  getClientById(@Param('id') id: string): Promise<User> {
-    return this.userService.getClientById(id);
+  getClientById(@Param('id') id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getClientById(id));
   }
 
   @Get("/admin/:id")
-  getAdminById(@Param('id') id: string): Promise<User> {
-    return this.userService.getAdminById(id);
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  getAdminById(@Param('id') id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.getAdminById(id));
   }
 
   @Patch("/:id")
-  updateUser(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-    return this.userService.update(id, updateUserDto)
+  updateUser(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.update(id, updateUserDto))
   }
 
   @Delete("/:id")
-  delete(@Param("id") id: string): Promise<SuccessReturn> {
-    return this.userService.softDelete(id)
+  delete(@Param("id") id: string): Promise<SuccessResponse>{
+    return this.renderSuccessResponse(this.userService.softDelete(id));
   }
 
   @Patch("restore/:id")
-  restore(@Param("id") id: string): Promise<SuccessReturn> {
-    return this.userService.restore(id)
+  restore(@Param("id") id: string): Promise<SuccessResponse>{
+    return this.renderSuccessResponse(this.userService.restore(id));
   }
 
-  @Get('activate/:id')
-  activateAccount(@Param('id') id: string) {
-    return this.userService.activate(id);
+  @Post('activate/:id')
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  activateAccount(@Param('id') id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.activate(id));
   }
 
-  @Get('deactivate/:id')
-  deactivateAccount(@Param('id') id: string) {
-    return this.userService.deactivate(id);
+  @Post('deactivate/:id')
+  @Roles(RolesEnum.ROLE_ADMIN)
+  @UseGuards(RoleGuard)
+  deactivateAccount(@Param('id') id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.deactivate(id));
   }
 }

@@ -1,14 +1,10 @@
-import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { LpData } from 'src/user/entities/lp-data.entity';
 import { Category } from 'src/questions/entities/category.entity';
 import { User } from 'src/user/entities/user.entity';
+import { AbstractEntity } from "src/misc/abstracts/abstract.entity";
 
 @Entity()
-export class Post extends TimeStamp {
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class Post extends AbstractEntity {
 
   @Column()
   title: string;
@@ -23,5 +19,5 @@ export class Post extends TimeStamp {
   category: Category;
 
   @ManyToOne(() => User, (user: User) => user.posts)
-  user: User;
+  creator: User;
 }

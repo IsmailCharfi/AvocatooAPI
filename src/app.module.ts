@@ -3,9 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { MessagingGateway } from './messaging/messaging.gateway';
+import { MessagingGateway } from './messaging/gateways/messaging.gateway';
 import { MailModule } from './mail/mail.module';
-import { FeedsModule } from './feed/feed.module';
+import { FeedModule } from './feed/feed.module';
 import { QuestionsModule } from './questions/questions.module';
 import { MessagingModule } from './messaging/messaging.module';
 import * as dotenv from 'dotenv';
@@ -27,11 +27,11 @@ dotenv.config();
     UserModule,
     AuthModule,
     MailModule,
-    FeedsModule,
+    FeedModule,
     QuestionsModule,
     MessagingModule,
   ],
   controllers: [],
-  providers: [MessagingGateway],
+  providers: [],
 })
 export class AppModule {}

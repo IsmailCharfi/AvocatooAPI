@@ -1,6 +1,6 @@
 import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from "typeorm";
 
-export class TimeStamp {
+export abstract class TimeStamp {
 
     @CreateDateColumn({
         update: false

@@ -1,14 +1,11 @@
-import { TimeStamp } from '../../misc/TimeStamp'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from 'src/user/entities/user.entity';
 import { Category } from './category.entity';
 import { Ticket } from './ticket.entity';
+import { AbstractEntity } from 'src/misc/abstracts/abstract.entity';
 
 @Entity()
-export class Question extends TimeStamp {
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class Question extends AbstractEntity  {
 
   @Column()
   title: string;

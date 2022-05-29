@@ -20,9 +20,12 @@ export class Paginator {
   static async createPage<T>(
     queryBuilder: SelectQueryBuilder<T>,
     pageOptionsDto: PageOptionsDto,
+    callbackExport?: (item: T) => any
   ): Promise<PageDto<T>> {
     const itemCount = await queryBuilder.getCount();
-    const items = await queryBuilder.getMany();
+    let items = await queryBuilder.getMany();   
+    
+    if(callbackExport) items = items.map(callbackExport)
 
     const pageMetaDto = new PageMetaDto({
       itemCount,
@@ -36,8 +39,9 @@ export class Paginator {
     queryBuilder: SelectQueryBuilder<T>,
     pageOptionsDto: PageOptionsDto,
     orderOptions?: { field: string },
+    callbackExport?: (item: T) => any
   ): Promise<PageDto<T>> {
     Paginator.paginate(queryBuilder, pageOptionsDto, orderOptions);
-    return Paginator.createPage(queryBuilder, pageOptionsDto);
+    return Paginator.createPage(queryBuilder, pageOptionsDto, callbackExport);
   }
 }

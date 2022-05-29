@@ -6,11 +6,12 @@ import { QuestionsModule } from 'src/questions/questions.module';
 import { Category } from 'src/questions/entities/category.entity';
 import { Post } from './entities/post.entity';
 import { PostController } from './controllers/post.controller';
-import { PostService } from './services/feed.service';
+import { PostService } from './services/post.service';
 
 @Module({
-  imports:[UserModule, QuestionsModule, TypeOrmModule.forFeature([Post, Category, User])],
+  imports:[UserModule, QuestionsModule, TypeOrmModule.forFeature([Post])],
   controllers: [PostController],
-  providers: [PostService]
+  providers: [PostService],
+  exports: [PostService]
 })
-export class FeedsModule {}
+export class FeedModule {}

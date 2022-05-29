@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LpData } from '../entities/lp-data.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { LpDataRegisterDto } from 'src/auth/dto/register/register-lpData.dto';
 import { Category } from 'src/questions/entities/category.entity';
 import { UpdateLpDataDto } from '../dto/update/update-lpData.dto';
@@ -52,15 +52,23 @@ export class LpDataService {
     });
   }
 
-  async softDelete(id: string): Promise<SuccessReturn> {
-    await this.lpDataRepository.softDelete(id);
+  async softDelete(id: string): Promise<UpdateResult> {
+    const result: UpdateResult = await this.lpDataRepository.softDelete(id);
 
-    return {};
+    if(result.affected == 0) {
+      throw new NotFoundException()
+    }
+
+    return result
   }
 
-  async restore(id: string): Promise<SuccessReturn> {
-    await this.lpDataRepository.restore(id);
+  async restore(id: string): Promise<UpdateResult> {
+    const result: UpdateResult = await this.lpDataRepository.restore(id);
 
-    return {};
+    if(result.affected == 0) {
+      throw new NotFoundException()
+    }
+
+    return result
   }
 }
