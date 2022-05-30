@@ -13,6 +13,7 @@ import { HashValidityDto } from '../dto/hash-validity.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { MailService } from 'src/mail/services/mail.service';
 import { UpdateResult } from 'typeorm';
+import { ExportUserSimpleDto } from 'src/user/dto/export/export-user-simple.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,21 +22,21 @@ export class AuthService {
     private mailService: MailService,
   ) {}
 
-  async register(userRegisterDto: UserRegisterDto, role: RolesEnum): Promise<User> {
+  async register(userRegisterDto: UserRegisterDto, role: RolesEnum, file?: Express.Multer.File): Promise<ExportUserSimpleDto> {
+    
     const { email } = userRegisterDto;
-    let user = await this.userService.getUserByEmail(email);
-    if (user) {
-      throw new ConflictException('there is already a user with this email');
-    }
-    user = await this.userService.create(userRegisterDto, role);
-    user = await this.userService.createActivationHash(user);
+    const user = await this.userService.getUserByEmail(email);
+
+    if (user) 
+      throw new NotFoundException('there is already a user with this email');
+
+    let createdUser = await this.userService.create(userRegisterDto, role, file);
+
+    createdUser = await this.userService.createActivationHash(createdUser);
+
     await this.mailService.sendActivationMail(user.email);
-    delete user.password;
-    delete user.salt;
-    delete user.activationHash;
-    delete user.resetPasswordHash;
-    delete user.resetPasswordSentAt;
-    return user;
+    
+    return createdUser.exportUserSimple();
   }
 
   async login(
@@ -43,7 +44,7 @@ export class AuthService {
     adminRoute: boolean,
   ): Promise<LoginResponeDto | AdminLoginResponeDto> {
     const { email, password } = credentialsDto;
-    const user = await this.userService.getUserByEmail(email);
+    let user = await this.userService.getUserByEmail(email);
 
     if (!user) {
       throw new NotFoundException('Veuillez verifiez votre email');
@@ -65,8 +66,13 @@ export class AuthService {
 
     const jwt = this.jwtService.sign(payload);
 
-    if (adminRoute) {
-      if (user.role === RolesEnum.ROLE_ADMIN || user.role === RolesEnum.ROLE_DEV)
+    if(!adminRoute){
+      await this.userService.changeStateToOnline(user)
+      return { jwt };
+    }
+
+    if (adminRoute && (user.role === RolesEnum.ROLE_ADMIN || user.role === RolesEnum.ROLE_DEV)) {
+        user = await this.userService.changeStateToOnline(user)
         return {
           accessToken: jwt,
           userData: {
@@ -82,11 +88,9 @@ export class AuthService {
             avatar: '',
           },
         };
+      }
       throw new ForbiddenException('Veuillez verifiez votre email et mot de passe');
     }
-
-    return { jwt };
-  }
 
   async checkResetHashValidity(hash: string): Promise<HashValidityDto> {
     hash = decodeURIComponent(hash)
@@ -112,13 +116,17 @@ export class AuthService {
     return user;
   }
 
-  async activateAccountViaHash(hash: string): Promise<UpdateResult> {
+  async activateAccountViaHash(hash: string): Promise<User> {
     hash = decodeURIComponent(hash)
     const user = await this.userService.getUserByActivationHash(hash);
     if (!user)
       throw new NotFoundException();
     
     return this.userService.activate(user.id)
+  }
+
+  async logout(id: string): Promise<UpdateResult> {
+    return 
   }
   
 }

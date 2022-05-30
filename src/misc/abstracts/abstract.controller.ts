@@ -31,10 +31,10 @@ export abstract class AbstractController {
     }
 
     async renderCreatedResponse<T>(data: Promise<T>, message: string = "created"): Promise<CreatedResponse> {
-        return new CreatedResponse(data, message)
+        return new CreatedResponse(await data, message)
     }
 
     async render<T>(data: Promise<T>, status: HttpStatus = HttpStatus.OK, message: string = ""): Promise<HttpResponse> {
-        return new HttpResponse(data, status, message);
+        return new HttpResponse(await data, status, message);
     }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UserRegisterDto } from '../dto/register/register-user.dto';
 import { CredenialsDto } from '../dto/credenials.dto';
@@ -7,6 +7,10 @@ import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { AbstractController, CreatedResponse, SuccessResponse } from 'src/misc/abstracts/abstract.controller';
 import { Roles } from 'src/misc/decorators/role.decorator';
 import { RoleGuard } from 'src/misc/guards/role.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { LpImageConfig } from 'src/misc/multer-config/lp-image.config';
+import { JwtAuthGuard } from 'src/misc/guards/authentication.guard';
+import { ParseFormDataJsonPipe } from 'src/misc/pipes/parse-form-data.pipe';
 
 @Controller('auth')
 export class AuthController extends AbstractController{
@@ -19,14 +23,16 @@ export class AuthController extends AbstractController{
 
   @Post('register/lp')
   @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(RoleGuard)
-  registerLp(@Body() registerDto: UserRegisterDto): Promise<CreatedResponse> {
-    return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_LP));
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @UseInterceptors(FileInterceptor('imageFile', LpImageConfig))
+  registerLp(@Body(new ParseFormDataJsonPipe({ except: ['imageFile'] })) registerDto: UserRegisterDto, @UploadedFile() file: Express.Multer.File): Promise<CreatedResponse> {
+    console.log(file)
+    return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_LP, file));
   }
 
   @Post('register/admin')
   @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(RoleGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   registerAdmin(@Body() registerDto: UserRegisterDto): Promise<CreatedResponse> {
     return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_ADMIN));
   }
@@ -42,7 +48,7 @@ export class AuthController extends AbstractController{
     return this.renderSuccessResponse(this.authService.resetPassword(resetPasswordDto));
   }
 
-  @Get('activate/hash/:hash')
+  @Post('activate/hash/:hash')
   activateAccountViaHash(@Param('hash') hash: string): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.authService.activateAccountViaHash(hash));
   }
@@ -51,5 +57,11 @@ export class AuthController extends AbstractController{
   @HttpCode(HttpStatus.OK)
   login(@Body() credentialsDto: CredenialsDto, @Param('admin') admin: string,): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.authService.login(credentialsDto, !!admin));
+  }
+
+  @Post("/logout/:id")
+  @HttpCode(HttpStatus.OK)
+  logout(@Param("id") id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.authService.logout(id));
   }
 }

@@ -84,6 +84,19 @@ export class PostService {
     return this.postRepository.softDelete(id);
   }
 
+  async restorePost(id : string, user: User ): Promise<UpdateResult> {
+
+    const post = await this.postRepository.findOneBy({id})
+
+    if(!post)
+      throw new NotFoundException()
+
+    if(!isAllowed(user, RolesEnum.ROLE_LP) || (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id)) 
+      throw new UnauthorizedException();
+
+    return this.postRepository.restore(id);
+  }
+
 
   async acceptPost(id: string): Promise<UpdateResult> {
     return this.postRepository.update(id, {isAccepted: true});

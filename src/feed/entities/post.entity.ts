@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne } from "typeorm";
 import { Category } from 'src/questions/entities/category.entity';
 import { User } from 'src/user/entities/user.entity';
 import { AbstractEntity } from "src/misc/abstracts/abstract.entity";

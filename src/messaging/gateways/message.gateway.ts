@@ -5,28 +5,20 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 
-type Payload = {
-  toId: string;
-  fromId: string;
-  text: string;
-  date: string;
-};
-
-@WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
+@WebSocketGateway(5200, {
+  cors: {origin: '*',},
+  
 })
-export class MessagingGateway {
+export class MessageGateway {
   @WebSocketServer() server: Server;
 
-  @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: Payload): void {
+/*   @SubscribeMessage('msgToServer')
+  handleMessage(client: Socket, receivedMessageDto: ReceivedMessageDto): void {
     this.server.emit(`client-${payload.toId}`, {
       toId: payload.toId,
       fromId: payload.fromId,
       text: payload.text,
       date: payload.date,
     });
-  }
+  } */
 }

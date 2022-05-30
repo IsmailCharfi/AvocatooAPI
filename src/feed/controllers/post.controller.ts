@@ -50,6 +50,13 @@ export class PostController extends AbstractController{
     return this.renderSuccessResponse(this.postService.softDeletePost(id, user));
   }
 
+  @Patch('/restore/:id')
+  @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
+  @UseGuards(RoleGuard)
+  restorePost(@Param("id") id : string, @GetUser() user: User): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.postService.restorePost(id, user));
+  }
+
   @Roles(RolesEnum.ROLE_ADMIN)
   @UseGuards(RoleGuard)
   @HttpPost('/accept/:id')

@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsOptional, Max, Min } from "class-validator";
+import { IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from "class-validator";
 import { Order } from "src/misc/enums/order.enum";
 
 
@@ -16,14 +16,14 @@ export class PageOptionsDto {
   readonly page?: number = 1;
 
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   @Min(1)
   @Max(50)
   @IsOptional()
   readonly take?: number = 10;
 
-  get skip(): number {
-    return (this.page - 1) * this.take;
+  public get skip(): number {
+    return (+this.page - 1) * +this.take;
   }
 
 }

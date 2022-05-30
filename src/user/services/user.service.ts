@@ -25,11 +25,11 @@ export class UserService {
     private lpDataService: LpDataService,
   ) {}
 
-  async create(userRegisterDto: UserRegisterDto, role: RolesEnum): Promise<User> {
+  async create(userRegisterDto: UserRegisterDto, role: RolesEnum, image?: Express.Multer.File): Promise<User> {
     const { lpData, ...userRegister } = userRegisterDto;
 
     const user = this.userRepository.create(userRegister);
-    user.lpData = await this.lpDataService.create(lpData);
+    user.lpData = await this.lpDataService.create(lpData, image);
     user.salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, user.salt);
     user.role = role;
@@ -40,6 +40,15 @@ export class UserService {
   async getAll(getAllUsersDto: GetAllUsersDto): Promise<PageDto<ExportUserSimpleDto>> {
     const queryBuilder = this.userRepository.createQueryBuilder();
 
+    if (getAllUsersDto.search) {
+      queryBuilder
+      .where("firstName like :search")
+      .orWhere("lastName like :search")
+      .orWhere("email like :search")
+      .setParameter("search", `%${getAllUsersDto.search}%`)
+
+    }
+
     return Paginator.paginateAndCreatePage(queryBuilder, getAllUsersDto, {field: this.ORDER_BY}, (item: User) => item.exportUserSimple());
   }
 
@@ -48,9 +57,9 @@ export class UserService {
 
     queryBuilder
       .where('role like :role', { role: RolesEnum.ROLE_LP })
-      .andWhere('lpData is not null');
+      .andWhere('lpDataId is not null');
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllLpsDto, {field: this.ORDER_BY,});
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllLpsDto, {field: this.ORDER_BY,}, (item: User) => item.exportUserSimple());
   }
 
   async getAllClients(getAllClientsDto: GetAllClientsDto): Promise<PageDto<User>> {
@@ -59,7 +68,7 @@ export class UserService {
 
     queryBuilder.where('role like :role', { role: RolesEnum.ROLE_CLIENT });
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllClientsDto, {field: this.ORDER_BY,});
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllClientsDto, {field: this.ORDER_BY,}, (item: User) => item.exportUserSimple());
   }
 
   async getAllAdmins(getAllAdminsDto: GetAllAdminsDto): Promise<PageDto<User>> {
@@ -68,45 +77,52 @@ export class UserService {
 
     queryBuilder.where('role like :role', { role: RolesEnum.ROLE_ADMIN });
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllAdminsDto, {field: this.ORDER_BY,});
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllAdminsDto, {field: this.ORDER_BY,}, (item: User) => item.exportUserSimple());
   }
 
   async getUserById(id: string): Promise<User> {
-    return await this.userRepository.findOneBy({ id });
+    const user =  await this.userRepository.findOneBy({ id });
+
+    return user
   }
 
-  async getLpById(id: string): Promise<User> {
-    return await this.userRepository.findOneBy({ role: RolesEnum.ROLE_LP, id });
+  async getLpById(id: string): Promise<ExportUserSimpleDto> {
+    const lp = await this.userRepository.findOneBy({ role: RolesEnum.ROLE_LP, id });
+
+    return lp.exportUserSimple()
   }
 
-  async getClientById(id: string): Promise<User> {
-    return await this.userRepository.findOneBy({
+  async getClientById(id: string): Promise<ExportUserSimpleDto> {
+    const client =  await this.userRepository.findOneBy({
       role: RolesEnum.ROLE_CLIENT,
       id,
     });
+
+    return client.exportUserSimple()
   }
 
-  async getAdminById(id: string): Promise<User> {
-    return await this.userRepository.findOneBy({
+  async getAdminById(id: string): Promise<ExportUserSimpleDto> {
+    const admin =  await this.userRepository.findOneBy({
       role: RolesEnum.ROLE_ADMIN,
       id,
     });
+    return admin.exportUserSimple()
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { email } });
+    return (await this.userRepository.findOne({ where: { email } }));
   }
 
   async getUserByResetPasswordHash(hash: string): Promise<User> {
-    return await this.userRepository.findOne({
+    return (await this.userRepository.findOne({
       where: { resetPasswordHash: Like(hash) },
-    });
+    }));
   }
 
   async getUserByActivationHash(hash: string): Promise<User> {
-    return await this.userRepository.findOne({
+    return (await this.userRepository.findOne({
       where: { activationHash: Like(hash) },
-    });
+    }));
   }
 
   async createResetPasswordHash(user: User): Promise<User> {
@@ -114,9 +130,7 @@ export class UserService {
     user.resetPasswordHash = await bcrypt.hash(dataToHash, user.salt);
     user.resetPasswordSentAt = new Date();
 
-    this.userRepository.save(user);
-
-    return user;
+    return this.userRepository.save(user);
   }
 
   async resetPassword(user: User, password: string): Promise<User> {
@@ -124,17 +138,17 @@ export class UserService {
     user.resetPasswordHash = null;
     user.resetPasswordSentAt = null;
 
-    return this.userRepository.save(user);
+    return (await this.userRepository.save(user));
   }
 
   async createActivationHash(user: User): Promise<User> {
     const dataToHash = user.id + new Date().toDateString() + Math.random();
     user.activationHash = await bcrypt.hash(dataToHash, user.salt);
 
-    return this.userRepository.save(user);
+    return (await this.userRepository.save(user));
   }
 
-  async activate(id: string): Promise<UpdateResult> {
+  async activate(id: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) throw new NotFoundException();
@@ -143,22 +157,22 @@ export class UserService {
     user.activationHash = null;
     ;
 
-    return this.userRepository.update(user.id, user);
+    return (await this.userRepository.save(user));
   }
 
-  async deactivate(id: string): Promise<UpdateResult> {
+  async deactivate(id: string): Promise<ExportUserSimpleDto> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) throw new NotFoundException();
 
     user.isActivated = false;
-    return this.userRepository.update(user.id, user);
+    return (await this.userRepository.save(user)).exportUserSimple();
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User>{
+  async update(id: string, updateUserDto: UpdateUserDto, file?: Express.Multer.File): Promise<ExportUserSimpleDto>{
     const { lpData, ...userUpdate } = updateUserDto;
     
-    const newLpData = await this.lpDataService.update(lpData.id,  lpData);
+    const newLpData = await this.lpDataService.update(lpData.id, lpData, file);
     const newUser =  await this.userRepository.preload({id, ...userUpdate, lpData: newLpData});
 
     this.userRepository.save(newUser);
@@ -169,7 +183,7 @@ export class UserService {
     delete newUser.resetPasswordHash;
     delete newUser.resetPasswordSentAt;
 
-    return newUser;
+    return newUser.exportUserSimple();
   }
 
   async softDelete(id: string): Promise<UpdateResult>{
@@ -191,5 +205,19 @@ export class UserService {
 
     await this.lpDataService.restore(user.lpData.id);
     return await this.userRepository.restore(id);
+  }
+
+  async changeStateToOnline(user: User): Promise<User> {
+    user.isOnline = true;
+    user = await this.userRepository.save(user);
+    //notify
+    return user;
+  }
+
+  async changeStateToOffline(user: User): Promise<User> {
+    user.isOnline = false;
+    user =  await this.userRepository.save(user);
+    //notify
+    return user;
   }
 }

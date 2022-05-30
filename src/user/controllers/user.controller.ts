@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, UseInterceptors} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/misc/guards/authentication.guard';
 import { PageDto } from 'src/misc/utils/pagination/dto/page.dto';
 import { GetAllAdminsDto } from '../dto/get/get-all-admins.dto';
@@ -11,6 +11,8 @@ import { AbstractController, SuccessResponse } from 'src/misc/abstracts/abstract
 import { Roles } from 'src/misc/decorators/role.decorator';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { RoleGuard } from 'src/misc/guards/role.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { LpImageConfig } from 'src/misc/multer-config/lp-image.config';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -67,6 +69,14 @@ export class UserController extends AbstractController{
 
   @Patch("/:id")
   updateUser(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.userService.update(id, updateUserDto))
+  }
+
+  @Patch("lp/:id")
+  @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
+  @UseGuards(RoleGuard)
+  @UseInterceptors(FileInterceptor('imageFile', LpImageConfig))
+  updateLp(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.userService.update(id, updateUserDto))
   }
 

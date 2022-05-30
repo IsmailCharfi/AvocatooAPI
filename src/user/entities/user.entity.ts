@@ -67,14 +67,30 @@ export class User extends AbstractEntity  {
     return {
       id: this.id,
       email: this.email,
-      firstName: this.email,
+      firstName: this.firstName,
       lastName: this.lastName,
       dateOfBirth: this.dateOfBirth,
       phoneNumber: this.phoneNumber,
       role: this.role,
       isActivated: this.isActivated,
       isOnline: this.isOnline,
-      lpData: this.lpData? this.lpData.exportLpDataSimple() : null,   
+      lpData: this.lpData? this.lpData.exportLpDataSimple() : null,  
     }
   }
+
+/*   exportUserWithPosts(): ExportUserWithPostsDto {
+    return {
+      id: this.id,
+      email: this.email,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      dateOfBirth: this.dateOfBirth,
+      phoneNumber: this.phoneNumber,
+      role: this.role,
+      isActivated: this.isActivated,
+      isOnline: this.isOnline,
+      lpData: this.lpData? this.lpData.exportLpDataSimple() : null,
+      lpthis.posts   
+    }
+  } */
 }

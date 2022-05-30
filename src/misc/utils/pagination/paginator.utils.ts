@@ -13,7 +13,7 @@ export class Paginator {
     if (orderOptions && pageOptions.order) {
       queryBuilder.orderBy(orderOptions.field, pageOptions.order);
     }
-
+    console.log("&&&&&&&&&&&&&&", typeof pageOptions.page)
     queryBuilder.skip(pageOptions.skip).take(pageOptions.take);
   }
 

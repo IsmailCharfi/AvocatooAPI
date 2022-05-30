@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards} from '@nestjs/common';
 import { AbstractController, CreatedResponse, HttpResponse, SuccessResponse } from 'src/misc/abstracts/abstract.controller';
 import { GetUser } from 'src/misc/decorators/get-user.decorator';
 import { Roles } from 'src/misc/decorators/role.decorator';
@@ -28,8 +28,6 @@ export class QuestionController extends AbstractController{
   }
 
   @Get("/:id")
-  @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(RoleGuard)
   getQuestionById(@Param("id") id: string): Promise<SuccessResponse>{
     return this.renderSuccessResponse(this.questionService.getQuestionById(id));
   }
@@ -39,12 +37,17 @@ export class QuestionController extends AbstractController{
     return this.renderCreatedResponse(this.questionService.addQuestion(addQuestionDto, user));
   }
 
-  @Post('/:id')
+  @Patch('/:id')
   updateQuestion(@Param("id") id: string,  @GetUser() user: User): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.questionService.softDeleteQuestion(id, user));
   }
 
-  @Patch('/:id')
+  @Delete('/:id')
+  deleteQuestion(@Param("id") id: string,  @GetUser() user: User): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.questionService.softDeleteQuestion(id, user));
+  }
+
+  @Patch('restore/:id')
   @Roles(RolesEnum.ROLE_ADMIN)
   @UseGuards(RoleGuard)
   restoreQuestion(@Param("id") id: string, @GetUser() user: User): Promise<SuccessResponse> {

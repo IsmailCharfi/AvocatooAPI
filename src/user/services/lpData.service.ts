@@ -6,6 +6,8 @@ import { LpDataRegisterDto } from 'src/auth/dto/register/register-lpData.dto';
 import { Category } from 'src/questions/entities/category.entity';
 import { UpdateLpDataDto } from '../dto/update/update-lpData.dto';
 
+const DEFAULT_IMAGE = "/public/images/default.png"
+
 @Injectable()
 export class LpDataService {
   constructor(
@@ -15,10 +17,12 @@ export class LpDataService {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async create(lpDataRegisterDto: LpDataRegisterDto): Promise<LpData> {
+  async create(lpDataRegisterDto: LpDataRegisterDto, image?: Express.Multer.File): Promise<LpData> {
     if (!lpDataRegisterDto) return null;
 
-    const { expertise, image } = lpDataRegisterDto;
+    const { expertise } = lpDataRegisterDto;
+
+    const imagePath = image?.path || DEFAULT_IMAGE;
 
     const expertiseObjects = await Promise.all(
       expertise.map(async (expertise: string) => {
@@ -26,18 +30,18 @@ export class LpDataService {
       }),
     );
 
-    const lpData = this.lpDataRepository.create({
-      image,
-      expertise: expertiseObjects,
-    });
+    const lpData = this.lpDataRepository.create({expertise: expertiseObjects, image: imagePath});
 
     return this.lpDataRepository.save(lpData);
   }
 
-  async update(id: string, lpDataUpdateDto: UpdateLpDataDto): Promise<LpData> {
+  async update(id: string, lpDataUpdateDto: UpdateLpDataDto, image?: Express.Multer.File): Promise<LpData> {
     if (!lpDataUpdateDto) return null;
 
-    const { expertise, image } = lpDataUpdateDto;
+    const lpData = await this.lpDataRepository.findOneBy({id});
+
+    const { expertise } = lpDataUpdateDto;
+    const imagePath = image?.path || lpData.image || DEFAULT_IMAGE;
 
     const newExpertiseObjects = await Promise.all(
       expertise.map(async (expertise: string) => {
@@ -47,8 +51,8 @@ export class LpDataService {
 
     return this.lpDataRepository.save({
       id,
-      image,
       expertise: newExpertiseObjects,
+      image: imagePath
     });
   }
 
