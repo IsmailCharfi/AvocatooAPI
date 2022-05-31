@@ -24,6 +24,11 @@ export class PostController extends AbstractController{
     return this.renderSuccessResponse(this.postService.getPostsByCreator(id, getAllPostsDto));
   }
 
+  @Get("/category/:id")
+  getPostsByCategory(@Param("id") id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.postService.getPostByCategory(id));
+  }
+
   @Get(':id')
   getPostById(@Param('id') id: string): Promise<SuccessResponse>{
     return this.renderSuccessResponse(this.postService.getPostById(id));
