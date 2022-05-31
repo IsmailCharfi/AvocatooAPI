@@ -204,10 +204,10 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, file?: Express.Multer.File): Promise<ExportUserSimpleDto>{
-    const { lpData, ...userUpdate } = updateUserDto;
+    let { lpData, ...userUpdate } = updateUserDto;
     
-    const newLpData = await this.lpDataService.update(lpData.id, lpData, file);
-    const newUser =  await this.userRepository.preload({id, ...userUpdate, lpData: newLpData});
+    const newLpData = lpData ? await this.lpDataService.update(lpData.id, lpData, file) : null;
+    const newUser =  await this.userRepository.preload({id, ...userUpdate, ...(newLpData ? {lpData: newLpData} : {} )});
 
     this.userRepository.save(newUser);
 
