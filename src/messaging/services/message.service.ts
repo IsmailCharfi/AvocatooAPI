@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TicketService } from 'src/questions/services/ticket.service';
 import { UserService } from 'src/user/services/user.service';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { MsgWebSocketDto } from '../dto/msg-web-socket.dto.ts';
 import { Message } from '../entities/message.entity';
 
@@ -23,5 +23,15 @@ export class MessageService {
     const message = this.messageRepository.create({...msgWebSocketDto, from, to, ticket})
 
     return this.messageRepository.save(message);
+  }
+
+  async getMessagesByTicket(id: string): Promise<Message[]>{
+
+    return this.messageRepository.find({
+      where: {ticket: Like(id)},
+      order: {
+        createdAt: 'ASC'
+      }
+    });
   }
 }
