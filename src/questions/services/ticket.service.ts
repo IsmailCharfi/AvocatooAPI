@@ -47,6 +47,15 @@ export class TicketService{
     return Paginator.paginateAndCreatePage(queryBuilder, getAllTicketsDto, {field: this.ORDER_BY})
   }
 
+  async getTicketById(id: string): Promise<Ticket> {
+    const ticket = await  this.ticketRepository.findOneBy({id});
+
+    if(!ticket)
+      throw new NotFoundException()
+
+    return ticket;
+  }
+
   async openTicket(addTicketDto: AddTicketDto): Promise<Ticket> {
 
     const question = await this.questionService.getQuestionById(addTicketDto.question);

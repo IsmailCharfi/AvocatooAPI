@@ -2,10 +2,10 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { LpData } from './lp-data.entity';
 import { Question } from 'src/questions/entities/question.entity';
-import { Exclude } from 'class-transformer';
 import { Post } from 'src/feed/entities/post.entity';
 import { AbstractEntity } from 'src/misc/abstracts/abstract.entity';
 import { ExportUserSimpleDto } from "../dto/export/export-user-simple.dto";
+import { Ticket } from "src/questions/entities/ticket.entity";
 @Entity()
 export class User extends AbstractEntity  {
 
@@ -25,29 +25,24 @@ export class User extends AbstractEntity  {
   phoneNumber: string;
 
   @Column()
-  @Exclude()
   password: string;
 
   @Column()
-  @Exclude()
   salt: string;
 
   @Column( {type: 'enum', enum: RolesEnum})
   role: RolesEnum;
 
   @Column({nullable: true})
-  @Exclude()
   resetPasswordHash: string;
 
   @Column({nullable: true})
-  @Exclude()
   resetPasswordSentAt: Date;
   
   @Column({nullable: true})
   isActivated: boolean;
 
   @Column({nullable: true})
-  @Exclude()
   activationHash: string;
 
   @Column()
@@ -63,7 +58,11 @@ export class User extends AbstractEntity  {
   @OneToMany(() => Post, (post: Post) => post.creator)
   posts: Post[];
 
+  @OneToMany(() => Ticket, (ticket: Ticket) => ticket.lp)
+  lpTickets: Ticket[];
+
   exportUserSimple(): ExportUserSimpleDto {
+
     return {
       id: this.id,
       email: this.email,
@@ -74,7 +73,8 @@ export class User extends AbstractEntity  {
       role: this.role,
       isActivated: this.isActivated,
       isOnline: this.isOnline,
-      lpData: this.lpData? this.lpData.exportLpDataSimple() : null,  
+      lpData: this.lpData ? this.lpData.exportLpDataSimple() : null, 
+      createdAt: this.createdAt, 
     }
   }
 

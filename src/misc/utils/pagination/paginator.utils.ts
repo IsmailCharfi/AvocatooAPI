@@ -24,7 +24,7 @@ export class Paginator {
   ): Promise<PageDto<T>> {
     const itemCount = await queryBuilder.getCount();
     let items = await queryBuilder.getMany();   
-    
+    console.log(items)
     if(callbackExport) items = items.map(callbackExport)
 
     const pageMetaDto = new PageMetaDto({

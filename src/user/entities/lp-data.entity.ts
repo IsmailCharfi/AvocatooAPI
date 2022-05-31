@@ -18,9 +18,6 @@ export class LpData extends AbstractEntity {
   @OneToOne(() => User, (user: User) => user.lpData)
   user: User;
 
-  @OneToMany(() => Ticket, (ticket: Ticket) => ticket.lp)
-  tickets: Ticket[];
-
   exportLpDataSimple(): ExportLpDataSimpleDto {
 
     const expertise = this.expertise.map(expertise => expertise.exportCategorySimple())

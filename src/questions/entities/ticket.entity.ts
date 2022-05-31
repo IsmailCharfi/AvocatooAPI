@@ -24,8 +24,8 @@ export class Ticket extends AbstractEntity {
   @ManyToOne(() => Question, (question: Question) => question.tickets, {eager: true})
   question: Question;
 
-  @ManyToOne(() => LpData, (lp: LpData) => lp.tickets, {eager: true})
-  lp : LpData;
+  @ManyToOne(() => User, (lp: User) => lp.lpTickets, {eager: true})
+  lp : User;
 
   @OneToMany(() => Message, (message: Message) => message.ticket, {eager: true})
   messages: Message[];

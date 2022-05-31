@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../entities/user.entity';
-import { Like, Repository, UpdateResult } from 'typeorm';
+import { IsNull, Like, Not, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRegisterDto } from '../../auth/dto/register/register-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -14,6 +14,8 @@ import { GetAllAdminsDto } from '../dto/get/get-all-admins.dto';
 import { GetAllLpsDto } from '../dto/get/get-all-lps.dto';
 import { UpdateUserDto } from '../dto/update/update-user.dto';
 import { ExportUserSimpleDto } from '../dto/export/export-user-simple.dto';
+import { PageMetaDto } from 'src/misc/utils/pagination/dto/page-meta.dto';
+import { PageOptionsDto } from 'src/misc/utils/pagination/dto/page-options.dto';
 
 @Injectable()
 export class UserService {
@@ -38,28 +40,60 @@ export class UserService {
   }
 
   async getAll(getAllUsersDto: GetAllUsersDto): Promise<PageDto<ExportUserSimpleDto>> {
-    const queryBuilder = this.userRepository.createQueryBuilder();
+    let where;
+    if(getAllUsersDto.search)
+      where = [
+        {firstName: Like(`%${getAllUsersDto.search}%`)},
+        {lastName: Like(`%${getAllUsersDto.search}%`)},
+        {email: Like(`%${getAllUsersDto.search}%`)}
+      ]
 
-    if (getAllUsersDto.search) {
-      queryBuilder
-      .where("firstName like :search")
-      .orWhere("lastName like :search")
-      .orWhere("email like :search")
-      .setParameter("search", `%${getAllUsersDto.search}%`)
+    let [items, itemCount] =  await this.userRepository.findAndCount({
+      relations: ["lpData"],
+      join: {
+        alias: "user",
+        leftJoinAndSelect: {
+          lpData: 'user.lpData'
+        }
+      },
+      ...( getAllUsersDto .search ? {where} : {}),
+      skip: getAllUsersDto.skip,
+      take: getAllUsersDto.take,
+    })
 
-    }
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: getAllUsersDto as PageOptionsDto,
+    });
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllUsersDto, {field: this.ORDER_BY}, (item: User) => item.exportUserSimple());
-  }
+    return new PageDto(items.map(item => item.exportUserSimple()), pageMetaDto);
+      }
 
-  async getAllLps(getAllLpsDto: GetAllLpsDto): Promise<PageDto<User>> {
-    const queryBuilder = this.userRepository.createQueryBuilder();
+  async getAllLps(getAllLpsDto: GetAllLpsDto): Promise<PageDto<ExportUserSimpleDto>> {
 
-    queryBuilder
-      .where('role like :role', { role: RolesEnum.ROLE_LP })
-      .andWhere('lpDataId is not null');
+    const where = {role: RolesEnum.ROLE_LP, lpData: Not(IsNull())}
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllLpsDto, {field: this.ORDER_BY,}, (item: User) => item.exportUserSimple());
+    let [items, itemCount] =  await this.userRepository.findAndCount({
+      relations: ["lpData"],
+      join: {
+        alias: "user",
+        leftJoinAndSelect: {
+          lpData: 'user.lpData'
+        }
+      },
+      ...( getAllLpsDto.search ? {where} : {}),
+      skip: getAllLpsDto.skip,
+      take: getAllLpsDto.take,
+    })
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: getAllLpsDto as PageOptionsDto,
+    });
+
+    return new PageDto(items.filter(item => item.role === RolesEnum.ROLE_LP).map(item => item.exportUserSimple()), pageMetaDto);
+
+    //return Paginator.paginateAndCreatePage(queryBuilder, getAllLpsDto, {field: this.ORDER_BY,}, (item: User) => item.exportUserSimple());
   }
 
   async getAllClients(getAllClientsDto: GetAllClientsDto): Promise<PageDto<User>> {
@@ -192,7 +226,7 @@ export class UserService {
     if(!user) 
     throw new NotFoundException()
     
-    await this.lpDataService.softDelete(user.lpData.id);
+    if(user.lpData) await this.lpDataService.softDelete(user.lpData.id);
     return await this.userRepository.softDelete(id);
 
   }

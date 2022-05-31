@@ -11,5 +11,6 @@ export class ExportUserSimpleDto {
     role: RolesEnum;
     isActivated: boolean;
     isOnline: boolean;
-    lpData: ExportLpDataSimpleDto   
+    lpData: ExportLpDataSimpleDto
+    createdAt: Date   
 }

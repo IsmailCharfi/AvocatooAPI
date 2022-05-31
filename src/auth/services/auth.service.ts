@@ -34,7 +34,7 @@ export class AuthService {
 
     createdUser = await this.userService.createActivationHash(createdUser);
 
-    await this.mailService.sendActivationMail(user.email);
+    await this.mailService.sendActivationMail(createdUser.email);
     
     return createdUser.exportUserSimple();
   }

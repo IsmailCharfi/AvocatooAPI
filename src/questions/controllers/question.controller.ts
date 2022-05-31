@@ -32,7 +32,7 @@ export class QuestionController extends AbstractController{
     return this.renderSuccessResponse(this.questionService.getQuestionById(id));
   }
 
-  @Post('/:id')
+  @Post('')
   addQuestion(@Body() addQuestionDto: AddQuestionDto, @GetUser() user: User): Promise<CreatedResponse> {
     return this.renderCreatedResponse(this.questionService.addQuestion(addQuestionDto, user));
   }
