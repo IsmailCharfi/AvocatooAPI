@@ -6,7 +6,7 @@ import { LpDataRegisterDto } from 'src/auth/dto/register/register-lpData.dto';
 import { Category } from 'src/questions/entities/category.entity';
 import { UpdateLpDataDto } from '../dto/update/update-lpData.dto';
 
-const DEFAULT_IMAGE = "/public/images/default.png"
+const DEFAULT_IMAGE = "public/images/default.png"
 
 @Injectable()
 export class LpDataService {

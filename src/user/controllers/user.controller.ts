@@ -20,8 +20,8 @@ export class UserController extends AbstractController{
   constructor(private readonly userService: UserService) {super()}
 
   @Get()
-  @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(RoleGuard)
+  // @Roles(RolesEnum.ROLE_ADMIN)
+  // @UseGuards(RoleGuard)
   getAll(@Query() getAllUsersDto: GetAllUsersDto): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.userService.getAll(getAllUsersDto));
   }
@@ -32,8 +32,8 @@ export class UserController extends AbstractController{
   }
 
   @Get("/client")
-  @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(RoleGuard)
+  // @Roles(RolesEnum.ROLE_ADMIN)
+  // @UseGuards(RoleGuard)
   getAllClients(@Query() getAllClientsDto: GetAllClientsDto): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.userService.getAllClients(getAllClientsDto));
   }

@@ -24,8 +24,8 @@ export class CategoryController extends AbstractController{
   }
 
   @Post()
-  @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(RoleGuard)
+  // @Roles(RolesEnum.ROLE_ADMIN)
+  // @UseGuards(RoleGuard)
   addCategory(@Body() addCategory: AddCategoryDto): Promise<CreatedResponse> {
       return this.renderCreatedResponse(this.categoryService.create(addCategory))
   }

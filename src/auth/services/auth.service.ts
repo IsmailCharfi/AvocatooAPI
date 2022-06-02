@@ -34,7 +34,7 @@ export class AuthService {
 
     createdUser = await this.userService.createActivationHash(createdUser);
 
-    await this.mailService.sendActivationMail(createdUser.email);
+    // await this.mailService.sendActivationMail(createdUser.email);
     
     return createdUser.exportUserSimple();
   }
@@ -62,13 +62,14 @@ export class AuthService {
     const payload: JwtPayloadDto = {
       email: user.email,
       role: user.role,
+      id: user.id
     };
 
     const jwt = this.jwtService.sign(payload);
 
     if(!adminRoute){
       await this.userService.changeStateToOnline(user)
-      return { jwt };
+      return { jwt , id:user.id};
     }
 
     if (adminRoute && (user.role === RolesEnum.ROLE_ADMIN || user.role === RolesEnum.ROLE_DEV)) {

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, UseInterceptors} from '@nestjs/common';
-import { AbstractController } from 'src/misc/abstracts/abstract.controller';
+import { AbstractController, SuccessResponse } from 'src/misc/abstracts/abstract.controller';
 import { JwtAuthGuard } from 'src/misc/guards/authentication.guard';
 import { Message } from '../entities/message.entity';
 import { MessageService } from '../services/message.service';
@@ -11,8 +11,8 @@ export class MessageController extends AbstractController{
   constructor(private readonly messageService: MessageService) {super()}
 
   @Get("/ticket/:id")
-  getMessages(@Param("id") id: string) :Promise<Message[]>{
-    return this.messageService.getMessagesByTicket(id);
+  getMessages(@Param("id") id: string) :Promise<SuccessResponse>{
+    return this.renderSuccessResponse(this.messageService.getMessagesByTicket(id));
   }
   
 }

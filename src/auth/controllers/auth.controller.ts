@@ -18,12 +18,14 @@ export class AuthController extends AbstractController{
 
   @Post('register/client')
   registerClient(@Body() registerDto: UserRegisterDto): Promise<CreatedResponse> {
+    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",registerDto)
+
     return this.renderCreatedResponse(this.authService.register(registerDto, RolesEnum.ROLE_CLIENT));
   }
 
   @Post('register/lp')
-  @Roles(RolesEnum.ROLE_ADMIN)
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  // @Roles(RolesEnum.ROLE_ADMIN)
+  // @UseGuards(JwtAuthGuard, RoleGuard)
   @UseInterceptors(FileInterceptor('imageFile', LpImageConfig))
   registerLp(@Body(new ParseFormDataJsonPipe({ except: ['imageFile'] })) registerDto: UserRegisterDto, @UploadedFile() file: Express.Multer.File): Promise<CreatedResponse> {
     console.log(file)

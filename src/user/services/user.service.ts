@@ -31,8 +31,11 @@ export class UserService {
     const { lpData, ...userRegister } = userRegisterDto;
 
     const user = this.userRepository.create(userRegister);
+
     user.lpData = await this.lpDataService.create(lpData, image);
+
     user.salt = await bcrypt.genSalt();
+
     user.password = await bcrypt.hash(user.password, user.salt);
     user.role = role;
 

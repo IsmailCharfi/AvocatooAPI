@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { isAllowed } from 'src/misc/utils/isAllowed.utils';
@@ -15,42 +19,49 @@ import { Post } from '../entities/post.entity';
 
 @Injectable()
 export class PostService {
-
-  readonly ORDER_BY = "createdAt";
+  readonly ORDER_BY = 'createdAt';
 
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
     private userService: UserService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
   ) {}
 
   async addPost(addPostDto: AddPostDto, user: User): Promise<Post> {
-    const { title, content } = addPostDto;
+    const { title, content, category } = addPostDto;
+    const cat = await this.categoryService.getCategoryById(category);
 
-    const post = this.postRepository.create({ title, content });
-    post.isAccepted=false;
+    const post = this.postRepository.create({ title, content, category: cat });
+    post.isAccepted = false;
     post.creator = await this.userService.getUserById(user.id);
 
     return this.postRepository.save(post);
   }
 
   async getAll(getAllPosts: GetAllPostsDto): Promise<PageDto<Post>> {
-    const queryBuilder = this.postRepository.createQueryBuilder();
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllPosts, {field: this.ORDER_BY});
+    const queryBuilder =
+      this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.creator','user.id')
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllPosts);
   }
 
-  async getPostsByCreator(creatorId: string, getAllPosts: GetAllPostsDto): Promise<PageDto<Post>> {
-
+  async getPostsByCreator(
+    creatorId: string,
+    getAllPosts: GetAllPostsDto,
+  ): Promise<PageDto<Post>> {
     const queryBuilder = this.postRepository.createQueryBuilder();
 
-    queryBuilder.where('creator like :creatorId', {creatorId})
+    queryBuilder.where('creator like :creatorId', { creatorId });
 
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllPosts, {field: this.ORDER_BY});
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllPosts, {
+      field: this.ORDER_BY,
+    });
   }
 
   async getPostById(id: string): Promise<Post> {
-    return this.postRepository.findOneBy({id});
+    return this.postRepository.findOneBy({ id });
   }
 
   async getPostByCategory(categoryId: string): Promise<Post[]> {
@@ -58,47 +69,48 @@ export class PostService {
     return this.postRepository.findBy(category);
   }
 
-  async updatePost(id : string, updatePostDto: UpdatePostDto, user: User ): Promise<UpdateResult> {
+  // async updatePost(id : string, updatePostDto: UpdatePostDto, user: User ): Promise<UpdateResult> {
 
-    const post = await this.postRepository.findOneBy({id})
+  //   const post = await this.postRepository.findOneBy({id})
 
-    if(!post)
-      throw new NotFoundException()
+  //   if(!post)
+  //     throw new NotFoundException()
 
-    if(!isAllowed(user, RolesEnum.ROLE_LP) || (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id)) 
-      throw new UnauthorizedException();
+  //   if(!isAllowed(user, RolesEnum.ROLE_LP) || (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id))
+  //     throw new UnauthorizedException();
 
-    return this.postRepository.update(id, updatePostDto);
-  }
+  //   return this.postRepository.update(id, updatePostDto);
+  // }
 
-  async softDeletePost(id : string, user: User ): Promise<UpdateResult> {
+  async softDeletePost(id: string, user: User): Promise<UpdateResult> {
+    const post = await this.postRepository.findOneBy({ id });
 
-    const post = await this.postRepository.findOneBy({id})
+    if (!post) throw new NotFoundException();
 
-    if(!post)
-      throw new NotFoundException()
-
-    if(!isAllowed(user, RolesEnum.ROLE_LP) || (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id)) 
+    if (
+      !isAllowed(user, RolesEnum.ROLE_LP) ||
+      (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id)
+    )
       throw new UnauthorizedException();
 
     return this.postRepository.softDelete(id);
   }
 
-  async restorePost(id : string, user: User ): Promise<UpdateResult> {
+  async restorePost(id: string, user: User): Promise<UpdateResult> {
+    const post = await this.postRepository.findOneBy({ id });
 
-    const post = await this.postRepository.findOneBy({id})
+    if (!post) throw new NotFoundException();
 
-    if(!post)
-      throw new NotFoundException()
-
-    if(!isAllowed(user, RolesEnum.ROLE_LP) || (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id)) 
+    if (
+      !isAllowed(user, RolesEnum.ROLE_LP) ||
+      (user.role === RolesEnum.ROLE_LP && post.creator.id !== user.id)
+    )
       throw new UnauthorizedException();
 
     return this.postRepository.restore(id);
   }
 
-
   async acceptPost(id: string): Promise<UpdateResult> {
-    return this.postRepository.update(id, {isAccepted: true});
+    return this.postRepository.update(id, { isAccepted: true });
   }
 }

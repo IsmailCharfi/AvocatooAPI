@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post as HttpPost, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post as HttpPost, Query, UseGuards } from '@nestjs/common';
+import { query } from 'express';
 import { AbstractController, CreatedResponse, SuccessResponse } from 'src/misc/abstracts/abstract.controller';
 import { GetUser } from 'src/misc/decorators/get-user.decorator';
 import { Roles } from 'src/misc/decorators/role.decorator';
@@ -15,12 +16,12 @@ export class PostController extends AbstractController{
   constructor(private readonly postService: PostService) {super()}
 
   @Get()
-  getAllPosts(getAllPostsDto: GetAllPostsDto): Promise<SuccessResponse> {
+  getAllPosts(@Query() getAllPostsDto: GetAllPostsDto): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.postService.getAll(getAllPostsDto));
   }
 
   @Get("/creator/:id")
-  getPostsByCreator(@Param("id") id: string, getAllPostsDto: GetAllPostsDto): Promise<SuccessResponse> {
+  getPostsByCreator(@Param("id") id: string, @Query() getAllPostsDto: GetAllPostsDto): Promise<SuccessResponse> {
     return this.renderSuccessResponse(this.postService.getPostsByCreator(id, getAllPostsDto));
   }
 
@@ -30,18 +31,18 @@ export class PostController extends AbstractController{
   }
 
   @HttpPost()
-  @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
-  @UseGuards(RoleGuard)
+  // @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
+  // @UseGuards(RoleGuard)
   addPost(@Body() addPostDto: AddPostDto, @GetUser() user: User): Promise<CreatedResponse> {
     return this.renderCreatedResponse(this.postService.addPost(addPostDto, user));
   }
 
-  @Patch(':id')
-  @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
-  @UseGuards(RoleGuard)
-  updatePost(@Param("id") id : string , @Body() addPostDto: AddPostDto, @GetUser() user: User): Promise<SuccessResponse> {
-    return this.renderSuccessResponse(this.postService.updatePost(id, addPostDto, user));
-  }
+  // @Patch(':id')
+  // @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
+  // @UseGuards(RoleGuard)
+  // updatePost(@Param("id") id : string , @Body() addPostDto: AddPostDto, @GetUser() user: User): Promise<SuccessResponse> {
+  //   return this.renderSuccessResponse(this.postService.updatePost(id, addPostDto, user));
+  // }
 
   @Delete(':id')
   @Roles(RolesEnum.ROLE_ADMIN, RolesEnum.ROLE_LP)
