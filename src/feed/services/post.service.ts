@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { InjectRepository } from '@nestjs/typeorm';
 import { RolesEnum } from 'src/misc/enums/roles.enum';
 import { isAllowed } from 'src/misc/utils/isAllowed.utils';
+import { PageMetaDto } from 'src/misc/utils/pagination/dto/page-meta.dto';
+import { PageOptionsDto } from 'src/misc/utils/pagination/dto/page-options.dto';
 import { PageDto } from 'src/misc/utils/pagination/dto/page.dto';
 import { Paginator } from 'src/misc/utils/pagination/paginator.utils';
 import { CategoryService } from 'src/questions/services/category.service';
@@ -17,6 +19,7 @@ import { Post } from '../entities/post.entity';
 export class PostService {
 
   readonly ORDER_BY = "createdAt";
+  readonly ORDER_BY_ = "post.createdAt"
 
   constructor(
     @InjectRepository(Post)
@@ -36,12 +39,16 @@ export class PostService {
   }
 
   async getAll(getAllPosts: GetAllPostsDto): Promise<PageDto<Post>> {
-    const queryBuilder = this.postRepository.createQueryBuilder();
-    return Paginator.paginateAndCreatePage(queryBuilder, getAllPosts, {field: this.ORDER_BY});
+    const queryBuilder = this.postRepository.createQueryBuilder("post");
+
+    queryBuilder.leftJoinAndSelect('user', 'post.creator')
+
+
+    return Paginator.paginateAndCreatePage(queryBuilder, getAllPosts, {field: this.ORDER_BY_});
   }
 
-  async getPostsByCreator(creatorId: string, getAllPosts: GetAllPostsDto): Promise<PageDto<Post>> {
 
+  async getPostsByCreator(creatorId: string, getAllPosts: GetAllPostsDto): Promise<PageDto<Post>> {
     const queryBuilder = this.postRepository.createQueryBuilder();
 
     queryBuilder.where('creator like :creatorId', {creatorId})

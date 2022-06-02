@@ -68,7 +68,7 @@ export class AuthService {
 
     if(!adminRoute){
       await this.userService.changeStateToOnline(user)
-      return { jwt };
+      return { jwt, id: user.id };
     }
 
     if (adminRoute && (user.role === RolesEnum.ROLE_ADMIN || user.role === RolesEnum.ROLE_DEV)) {

@@ -16,7 +16,9 @@ export class ParseFormDataJsonPipe implements PipeTransform {
     if (except?.length) {
       _.merge(originProperties, _.pick(serializedValue, ...except));
     }
+    console.log("testaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
     const deserializedValue = deepParseJson(value);
+    console.log(deepParseJson)
     return { ...deserializedValue, ...originProperties };
   }
 }

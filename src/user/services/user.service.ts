@@ -81,7 +81,7 @@ export class UserService {
           lpData: 'user.lpData'
         }
       },
-      ...( getAllLpsDto.search ? {where} : {}),
+      where,
       skip: getAllLpsDto.skip,
       take: getAllLpsDto.take,
     })
