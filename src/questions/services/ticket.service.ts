@@ -56,6 +56,11 @@ export class TicketService{
     return ticket;
   }
 
+  async getLp(id: string): Promise<any> {
+    return  this.ticketRepository.findOneBy({id})
+
+  }
+
   async openTicket(addTicketDto: AddTicketDto): Promise<Ticket> {
 
     const question = await this.questionService.getQuestionById(addTicketDto.question);

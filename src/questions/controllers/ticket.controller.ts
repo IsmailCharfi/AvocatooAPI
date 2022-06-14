@@ -32,6 +32,11 @@ export class TicketController extends AbstractController{
     return this.renderSuccessResponse(this.ticketService.getTicketsByQuestion(id, getAllTicketsDto));
   }
 
+  @Get("/:id/lp/")
+  getLpfromTicket(@Param("id") id: string): Promise<SuccessResponse> {
+    return this.renderSuccessResponse(this.ticketService.getLp(id))
+  }
+
   @Post()
   openTicket(@Body() addTicketDto: AddTicketDto): Promise<CreatedResponse> {
     return this.renderCreatedResponse(this.ticketService.openTicket(addTicketDto));

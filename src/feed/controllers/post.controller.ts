@@ -11,7 +11,6 @@ import { AddPostDto } from '../dto/add-post.dto';
 import { GetAllPostsDto } from '../dto/get-all-post.dto';
 import { PostService } from '../services/post.service';
 @Controller('posts')
-@UseGuards(JwtAuthGuard)
 export class PostController extends AbstractController{
   constructor(private readonly postService: PostService) {super()}
 

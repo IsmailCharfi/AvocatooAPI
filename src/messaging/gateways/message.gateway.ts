@@ -27,6 +27,7 @@ import { MessageService } from '../services/message.service';
 
   @SubscribeMessage('msgToServer')
   async handleMessage(client: Socket, msgWebSocketDto: MsgWebSocketDto): Promise<void> {
+    console.log(msgWebSocketDto)
 
     const fromId = msgWebSocketDto.from;
     const toId = msgWebSocketDto.to;
